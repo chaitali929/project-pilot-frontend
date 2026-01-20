@@ -1,6 +1,32 @@
-import React from "react";
+import React, { useState } from "react";
+import useUserStore from "../../store/userStore";
+import { authAPI } from "../../api";
 
 const Onboarding3 = () => {
+  const [formData, setFormData] = useState({
+    collegeName: '',
+    department: ''
+  });
+  const [isLoading, setIsLoading] = useState(false);
+  const { token } = useUserStore();
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!formData.collegeName || !formData.department) {
+      alert('Please fill in all fields');
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      await authAPI.updateProfile(formData);
+      window.location.href = '/StudentDashboard';
+    } catch (error) {
+      alert('Failed to update profile');
+    } finally {
+      setIsLoading(false);
+    }
+  };
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-white px-4">
       {/* Progress Steps */}
@@ -33,7 +59,7 @@ const Onboarding3 = () => {
       </h2>
 
       {/* Form Fields */}
-      <div className="w-full max-w-md space-y-6">
+      <form onSubmit={handleSubmit} className="w-full max-w-md space-y-6">
         {/* College Name */}
         <div>
           <label className="block text-gray-800 font-medium mb-1">
@@ -42,7 +68,10 @@ const Onboarding3 = () => {
           <input
             type="text"
             placeholder="Search your college name"
+            value={formData.collegeName}
+            onChange={(e) => setFormData({ ...formData, collegeName: e.target.value })}
             className="w-full border rounded-lg px-4 py-2"
+            required
           />
           <p className="text-sm text-blue-600 mt-1 cursor-pointer">
             Can’t find your college?
@@ -54,15 +83,24 @@ const Onboarding3 = () => {
           <label className="block text-gray-800 font-medium mb-1">
             Department
           </label>
-          <select className="w-full border rounded-lg px-4 py-2">
-            <option>Select your department</option>
-          </select>
+          <input
+            type="text"
+            placeholder="Enter your department"
+            value={formData.department}
+            onChange={(e) => setFormData({ ...formData, department: e.target.value })}
+            className="w-full border rounded-lg px-4 py-2"
+            required
+          />
         </div>
-      </div>
+      </form>
 
       {/* Continue Button */}
-      <button className="mt-8 bg-blue-600 text-white py-2 px-12 rounded-lg text-lg font-medium hover:bg-blue-700 transition">
-        Continue
+      <button 
+        onClick={handleSubmit}
+        disabled={isLoading}
+        className="mt-8 bg-blue-600 text-white py-2 px-12 rounded-lg text-lg font-medium hover:bg-blue-700 transition disabled:bg-gray-400"
+      >
+        {isLoading ? 'Saving...' : 'Continue'}
       </button>
     </div>
   );

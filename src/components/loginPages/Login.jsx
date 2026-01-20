@@ -1,9 +1,26 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
+import useUserStore from "../../store/userStore";
+import { authAPI } from "../../api";
 
 export default function Login() {
   const [showPassword, setShowPassword] = useState(false);
+  const [formData, setFormData] = useState({ email: '', password: '' });
+  const { login, isLoading, error, clearError } = useUserStore();
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    const result = await login(formData);
+    if (result.success) {
+      window.location.href = '/onboarding1';
+    }
+  };
+
+  const handleOAuthLogin = (provider) => {
+    const url = provider === 'google' ? authAPI.googleAuth() : authAPI.githubAuth();
+    window.location.href = url;
+  };
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-white">
@@ -20,8 +37,18 @@ export default function Login() {
           Welcome to ProjectPilot
         </h2>
 
+        {error && (
+          <div className="mt-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded">
+            {error}
+            <button onClick={clearError} className="float-right font-bold">×</button>
+          </div>
+        )}
+
         {/* Google Button */}
-        <button className="flex items-center justify-center w-full px-4 py-2 mt-6 border border-black-300 rounded-md hover:bg-gray-100">
+        <button 
+          onClick={() => handleOAuthLogin('google')}
+          className="flex items-center justify-center w-full px-4 py-2 mt-6 border border-black-300 rounded-md hover:bg-gray-100"
+        >
           <img
             src="https://upload.wikimedia.org/wikipedia/commons/4/4f/Google_%22G%22_Logo.svg"
             alt="Google"
@@ -31,7 +58,10 @@ export default function Login() {
         </button>
 
         {/* GitHub Button */}
-        <button className="flex items-center justify-center w-full px-4 py-2 mt-3 border border-black-300 rounded-md hover:bg-gray-100">
+        <button 
+          onClick={() => handleOAuthLogin('github')}
+          className="flex items-center justify-center w-full px-4 py-2 mt-3 border border-black-300 rounded-md hover:bg-gray-100"
+        >
           <img
             src="https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png"
             alt="GitHub"
@@ -47,11 +77,15 @@ export default function Login() {
           <div className="flex-1 h-px bg-gray-300"></div>
         </div>
 
+        <form onSubmit={handleSubmit}>
         {/* Email Input */}
         <input
           type="email"
           placeholder="Enter your email"
+          value={formData.email}
+          onChange={(e) => setFormData({ ...formData, email: e.target.value })}
           className="w-full px-4 py-2 mb-4 border border-black-300 rounded-md placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          required
         />
 
         {/* Password Input */}
@@ -59,7 +93,10 @@ export default function Login() {
           <input
             type={showPassword ? "text" : "password"}
             placeholder="Enter your password"
+            value={formData.password}
+            onChange={(e) => setFormData({ ...formData, password: e.target.value })}
             className="w-full px-4 py-2 border border-black-300 rounded-md placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            required
           />
           <span
             className="absolute right-3 top-3 cursor-pointer text-gray-500"
@@ -70,9 +107,14 @@ export default function Login() {
         </div>
 
         {/* Login Button */}
-        <button className="w-full px-4 py-2 text-white bg-blue-600 rounded-md hover:bg-blue-700">
-          Log in
+        <button 
+          type="submit"
+          disabled={isLoading}
+          className="w-full px-4 py-2 text-white bg-blue-600 rounded-md hover:bg-blue-700 disabled:bg-gray-400"
+        >
+          {isLoading ? 'Logging in...' : 'Log in'}
         </button>
+        </form>
 
         {/* Forgot Password */}
         <p className="mt-3 text-sm text-center text-blue-500 cursor-pointer hover:underline">

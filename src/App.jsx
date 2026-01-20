@@ -4,6 +4,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-d
 // Auth / Onboarding Pages
 import Login from "./components/loginPages/Login";
 import Signup from "./components/Signup";
+import AuthSuccess from "./components/AuthSuccess";
 import Onboarding1 from "./components/loginPages/Onboarding1";
 import Onboarding2 from "./components/loginPages/Onboarding2";
 import Onboarding3 from "./components/loginPages/Onboarding3";
@@ -30,6 +31,7 @@ function App() {
           {/* Auth pages */}
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
+          <Route path="/auth/success" element={<AuthSuccess />} />
 
           {/* Onboarding flow */}
           <Route path="/onboarding1" element={<Onboarding1 />} />
