@@ -19,6 +19,7 @@ import Workspace from "./components/Sidebar/Workspace";
 import GroupDetails from "./components/CreatedGroup"
 import NewProject from "./pages/NewProject";
 import Notifications from "./components/Sidebar/notifications";
+import MentorDashboard from "./pages/mentorDasboard";
 
 function App() {
   return (
@@ -40,6 +41,7 @@ function App() {
 
           {/* Dashboard */}
           <Route path="/StudentDashboard" element={<StudentDashboard />} />
+          <Route path="/MentorDashboard" element={<MentorDashboard/>}/>
 
           {/* Taskboard page */}
           <Route path="/StudentDashboard/Taskboard" element={<Taskboard />} />

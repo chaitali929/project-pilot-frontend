@@ -2,7 +2,7 @@ import React from "react";
 
 export default function Topbar() {
   return (
-    <header className="border-b bg-white px-6 py-4.5 flex items-center justify-between">
+    <header className="bg-white px-6 py-4.5 flex items-center justify-between">
       <div className="flex items-center gap-4 w-1/2">
         <div className="flex items-center bg-gray-50 border rounded px-3 py-2 w-full max-w-lg">
           <svg

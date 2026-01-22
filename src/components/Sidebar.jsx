@@ -16,7 +16,7 @@ export default function Sidebar({ isMobile = false, onClose }) {
 
   return (
     <aside
-      className={`w-64 bg-white border-r flex flex-col ${
+      className={`w-64 bg-white flex flex-col ${
         isMobile ? "h-full" : "hidden md:flex"
       }`}
     >
