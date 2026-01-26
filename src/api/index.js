@@ -21,7 +21,7 @@ export const authAPI = {
   signup: (userData) => api.post('/auth/signup', userData),
   login: (credentials) => api.post('/auth/login', credentials),
   updateProfile: (profileData) => api.put('/auth/profile', profileData),
-  googleAuth: () => `${API_BASE_URL}/auth/google`,
+  googleAuth: () => `${API_BASE_URL}/auth/google?prompt=select_account`,
   githubAuth: () => `${API_BASE_URL}/auth/github`,
 };
 

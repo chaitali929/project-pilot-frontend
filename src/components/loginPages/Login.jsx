@@ -13,7 +13,7 @@ export default function Login() {
     e.preventDefault();
     const result = await login(formData);
     if (result.success) {
-      window.location.href = '/onboarding1';
+      window.location.href = '/StudentDashboard';
     }
   };
 

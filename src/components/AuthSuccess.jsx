@@ -7,10 +7,11 @@ const AuthSuccess = () => {
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
     const token = urlParams.get('token');
+    const redirect = urlParams.get('redirect');
     
     if (token) {
       handleOAuthSuccess(token);
-      window.location.href = '/onboarding1';
+      window.location.href = redirect || '/onboarding1';
     } else {
       window.location.href = '/login';
     }

@@ -6,6 +6,7 @@ import {
 } from 'lucide-react';
 import Topbar from '../components/Topbar';
 import Sidebar from '../components/Sidebar';
+import MentorSidebar from '../components/MentorSideBar';
 
 const MentorDashboard = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -14,7 +15,7 @@ const MentorDashboard = () => {
     <div className="min-h-screen flex bg-gray-50">
       {/* Sidebar for desktop */}
       <div className="hidden md:flex">
-        <Sidebar />
+        <MentorSidebar />
       </div>
 
       {/* Mobile sidebar (drawer) */}
@@ -28,7 +29,7 @@ const MentorDashboard = () => {
 
           {/* Sidebar content */}
           <div className="relative z-50 w-64 bg-white shadow-xl">
-            <Sidebar />
+            <MentorSidebar />
           </div>
         </div>
       )}
