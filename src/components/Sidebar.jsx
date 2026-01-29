@@ -23,8 +23,8 @@ export default function Sidebar({ isMobile = false, onClose }) {
       {/* Header */}
       <div className="px-4 py-5 border-b flex items-center justify-between gap-3">
         <div className="flex items-center gap-3">
-          <div className="w-9 h-9 bg-gray-200 rounded flex items-center justify-center">
-            Logo
+          <div className="w-9 h-9 bg-blue-600 rounded flex items-center justify-center">
+            <span className="text-white font-bold text-sm">PP</span>
           </div>
           <div className="font-semibold text-lg">ProjectPilot</div>
         </div>

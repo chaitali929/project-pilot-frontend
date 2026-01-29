@@ -29,11 +29,9 @@ export default function Topbar() {
         <div className="text-sm text-gray-600">Active</div>
         <div className="flex items-center gap-3">
           {/* profile image */}
-          <img
-            src="/images/anuj-dighe.jpg" // path to profile image
-            alt="Anuj Dighe"
-            className="w-10 h-10 rounded-full object-cover border border-gray-200"
-          />
+          <div className="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center border border-gray-200">
+            <span className="text-white font-semibold text-sm">AD</span>
+          </div>
           <div className="text-sm">
             <div className="font-medium">Anuj Dighe</div>
             <div className="text-xs text-gray-500">Student</div>
