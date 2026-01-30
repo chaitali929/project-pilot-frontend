@@ -71,7 +71,7 @@ export default function MentorProjectDiary() {
             </div>
         
         {/* Stat Cards Row */}
-        <div className="flex flex-wrap gap-6">
+        <div className="flex flex-wrap gap-6 mb-8">
           <StatCard icon={Users} value="12" label="Active Teams" color={{ bg: 'bg-emerald-50', text: 'text-emerald-500' }} />
           <StatCard icon={Clock} value="5" label="Pending Reviews" color={{ bg: 'bg-amber-50', text: 'text-amber-500' }} />
           <StatCard icon={AlertCircle} value="2" label="Overdue Logs" color={{ bg: 'bg-rose-50', text: 'text-rose-500' }} />
@@ -80,95 +80,92 @@ export default function MentorProjectDiary() {
         </div>
 
         {/* Filter Bar */}
-        <div className="flex items-center justify-between gap-4">
-          <div className="flex items-center gap-4 flex-1">
-            <div className="relative w-72">
+        <div className="flex items-center justify-between gap-6 mb-8">
+          <div className="flex items-center gap-4">
+            <div className="relative w-80">
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
               <input 
                 type="text" 
                 placeholder="Search teams..." 
-                className="w-full pl-12 pr-10 py-3 bg-slate-100/50 border-none rounded-2xl text-slate-600 placeholder:text-slate-400 focus:ring-2 focus:ring-indigo-500/20 outline-none"
+                className="w-full pl-12 pr-4 py-3 bg-white border border-slate-200 rounded-xl text-slate-600 placeholder:text-slate-400 focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none"
               />
-              <button className="absolute right-3 top-1/2 -translate-y-1/2 p-1.5 bg-white rounded-lg shadow-sm">
-                <Filter size={14} className="text-slate-400" />
-              </button>
             </div>
 
             <div className="flex items-center gap-3">
-              <button className="px-6 py-3 bg-slate-100 text-slate-700 rounded-xl font-medium text-sm">Active</button>
-              <button className="px-4 py-3 bg-slate-100 text-slate-400 rounded-xl font-medium text-sm flex items-center gap-2">
-                Inactive <X size={14} />
+              <button className="px-4 py-2 bg-indigo-600 text-white rounded-lg font-medium text-sm">Active</button>
+              <button className="px-4 py-2 bg-slate-100 text-slate-600 rounded-lg font-medium text-sm hover:bg-slate-200 transition-colors">
+                Inactive
               </button>
-              <button className="px-4 py-3 bg-slate-100 text-slate-400 rounded-xl font-medium text-sm flex items-center gap-2">
-                Completed <X size={14} />
+              <button className="px-4 py-2 bg-slate-100 text-slate-600 rounded-lg font-medium text-sm hover:bg-slate-200 transition-colors">
+                Completed
               </button>
             </div>
           </div>
 
-          <button className="flex items-center gap-2 px-6 py-3 border-2 border-sky-400 text-sky-500 rounded-xl font-bold text-sm hover:bg-sky-50 transition-colors">
-            <Download size={18} />
+          <button className="flex items-center gap-2 px-4 py-2 border border-sky-500 text-sky-600 rounded-lg font-medium text-sm hover:bg-sky-50 transition-colors">
+            <Download size={16} />
             Export
           </button>
         </div>
 
         {/* Table Container */}
-        <div className="bg-white rounded-3xl border border-slate-100 shadow-sm overflow-hidden">
+        <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
           <table className="w-full text-left border-collapse">
             <thead>
-              <tr className="border-b border-slate-50 text-slate-500 text-sm font-medium">
-                <th className="px-8 py-6 text-center border-r border-slate-50">Team</th>
-                <th className="px-8 py-6 text-center border-r border-slate-50">Weeks/dates</th>
-                <th className="px-8 py-6 border-r border-slate-50 w-[40%] text-center">Summary</th>
-                <th className="px-8 py-6 text-center border-r border-slate-50">Proof of work</th>
-                <th className="px-8 py-6 text-center border-r border-slate-50">Status</th>
-                <th className="px-8 py-6 text-center border-r border-slate-50">Grades</th>
-                <th className="px-8 py-6 text-center">Action</th>
+              <tr className="bg-slate-50 border-b border-slate-200">
+                <th className="px-6 py-4 text-sm font-semibold text-slate-700 text-center">Team</th>
+                <th className="px-6 py-4 text-sm font-semibold text-slate-700 text-center">Week/Dates</th>
+                <th className="px-6 py-4 text-sm font-semibold text-slate-700 text-center">Summary</th>
+                <th className="px-6 py-4 text-sm font-semibold text-slate-700 text-center">Proof of Work</th>
+                <th className="px-6 py-4 text-sm font-semibold text-slate-700 text-center">Status</th>
+                <th className="px-6 py-4 text-sm font-semibold text-slate-700 text-center">Grade</th>
+                <th className="px-6 py-4 text-sm font-semibold text-slate-700 text-center">Action</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-50">
+            <tbody className="divide-y divide-slate-100">
               {MOCK_DATA.map((item) => (
-                <tr key={item.id} className="text-slate-700">
-                  <td className="px-8 py-6 border-r border-slate-50">
-                    <div className="flex flex-col items-center gap-3">
-                      <span className="font-bold text-sm">{item.team}</span>
-                      <div className="flex -space-x-2">
+                <tr key={item.id} className="hover:bg-slate-50 transition-colors">
+                  <td className="px-6 py-4">
+                    <div className="flex flex-col items-center gap-2">
+                      <span className="font-semibold text-sm text-slate-800">{item.team}</span>
+                      <div className="flex -space-x-1">
                         {[1, 2, 3, 4].map(i => (
                           <img 
                             key={i}
                             src={`https://i.pravatar.cc/100?u=${item.id}${i}`} 
-                            className="w-8 h-8 rounded-full border-2 border-white"
+                            className="w-6 h-6 rounded-full border-2 border-white"
                             alt="member"
                           />
                         ))}
                       </div>
                     </div>
                   </td>
-                  <td className="px-8 py-6 text-center border-r border-slate-50">
-                    <div className="font-bold text-sm mb-1">{item.week}</div>
-                    <div className="text-xs text-indigo-300 font-medium">{item.dates}</div>
+                  <td className="px-6 py-4 text-center">
+                    <div className="font-semibold text-sm text-slate-800">{item.week}</div>
+                    <div className="text-xs text-slate-500">{item.dates}</div>
                   </td>
-                  <td className="px-8 py-6 border-r border-slate-50">
-                    <p className="text-xs text-slate-500 leading-relaxed text-center">
+                  <td className="px-6 py-4">
+                    <p className="text-sm text-slate-600 leading-relaxed max-w-xs">
                       {item.summary}
                     </p>
                   </td>
-                  <td className="px-8 py-6 text-center border-r border-slate-50">
+                  <td className="px-6 py-4 text-center">
                     <div className="flex flex-col items-center gap-1">
-                      <div className="p-2 bg-blue-50 rounded-lg text-blue-400">
-                        {item.type === 'pdf' ? <FileText size={20} /> : <ImageIcon size={20} />}
+                      <div className="p-2 bg-blue-50 rounded-lg">
+                        {item.type === 'pdf' ? <FileText size={18} className="text-blue-500" /> : <ImageIcon size={18} className="text-blue-500" />}
                       </div>
-                      <span className="text-[10px] text-slate-400 font-medium">{item.pow}</span>
+                      <span className="text-xs text-slate-500">{item.pow}</span>
                     </div>
                   </td>
-                  <td className="px-8 py-6 text-center border-r border-slate-50">
+                  <td className="px-6 py-4 text-center">
                     <StatusBadge status={item.status} />
                   </td>
-                  <td className="px-8 py-6 text-center border-r border-slate-50 font-bold text-lg text-slate-600">
-                    {item.grade}
+                  <td className="px-6 py-4 text-center">
+                    <span className="font-bold text-lg text-slate-700">{item.grade}</span>
                   </td>
-                  <td className="px-8 py-6 text-center">
-                    <button className="p-2 border border-slate-200 rounded-xl text-slate-400 hover:text-slate-600 hover:bg-slate-50 transition-all">
-                      <Edit3 size={18} />
+                  <td className="px-6 py-4 text-center">
+                    <button className="p-2 border border-slate-200 rounded-lg text-slate-500 hover:text-slate-700 hover:bg-slate-50 transition-all">
+                      <Edit3 size={16} />
                     </button>
                   </td>
                 </tr>
