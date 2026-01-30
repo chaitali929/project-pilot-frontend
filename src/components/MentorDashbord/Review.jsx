@@ -1,5 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { Search, Filter, MessageSquare, ChevronLeft, ChevronRight, ExternalLink } from 'lucide-react';
+import MentorSideBar from "../MentorSideBar";
+import Topbar from "../Topbar";
 
 // --- Types & Constants ---
 const SubmissionStatus = {
@@ -208,50 +210,42 @@ export default function MentorReview() {
   };
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] text-slate-900 font-sans selection:bg-indigo-100">
-      {/* Toast Notification */}
-      {notification && (
-        <div className="fixed top-6 left-1/2 -translate-x-1/2 z-50 animate-in fade-in slide-in-from-top-4 duration-300">
-          <div className="bg-slate-900 text-white px-6 py-3 rounded-full shadow-2xl flex items-center space-x-3 text-sm font-medium">
-            <MessageSquare className="w-4 h-4 text-indigo-400" />
-            <span>{notification}</span>
-          </div>
-        </div>
-      )}
+    <div className="min-h-screen flex bg-gray-50">
+      <MentorSideBar />
 
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <header className="mb-10">
-          <h1 className="text-4xl font-extrabold tracking-tight text-slate-900 sm:text-5xl">
-            Submission Reviews
-          </h1>
-          <p className="mt-2 text-slate-500 text-lg">
-            Manage and provide feedback on team progress and final prototypes.
-          </p>
-        </header>
+      <div className="flex-1 flex flex-col overflow-hidden">
+        <Topbar />
 
-        <div className="mb-8">
-          <SearchBar 
-            value={searchQuery} 
-            onChange={(e) => setSearchQuery(e.target.value)} 
-          />
-        </div>
-
-        <ReviewTable 
-          reviews={filteredReviews} 
-          onFeedback={handleFeedback}
-          totalCount={24}
-        />
-        
-        <footer className="mt-12 pt-8 border-t border-slate-200">
-          <div className="flex flex-col md:flex-row justify-between items-center gap-4 text-slate-400 text-sm">
-            <p>© 2024 Evaluation Platform. All rights reserved.</p>
-            <div className="flex space-x-6">
-              <a href="#" className="hover:text-slate-600 transition-colors underline decoration-slate-200 underline-offset-4">Guidelines</a>
-              <a href="#" className="hover:text-slate-600 transition-colors underline decoration-slate-200 underline-offset-4">Scoring Rubric</a>
-              <a href="#" className="hover:text-slate-600 transition-colors underline decoration-slate-200 underline-offset-4">Help Center</a>
+        <main className="p-6 overflow-auto">
+          <div className="max-w-7xl mx-auto">
+            {/* Header */}
+            <div className="flex justify-between items-center mb-6">
+              <h1 className="text-2xl font-semibold">Review Submissions</h1>
             </div>
+
+            {/* Notification */}
+            {notification && (
+              <div className="mb-6 p-4 bg-indigo-50 border border-indigo-200 rounded-xl text-indigo-700 text-sm">
+                {notification}
+              </div>
+            )}
+
+            {/* Search Bar */}
+            <div className="mb-6">
+              <SearchBar 
+                value={searchQuery} 
+                onChange={(e) => setSearchQuery(e.target.value)} 
+              />
+            </div>
+
+            {/* Review Table */}
+            <ReviewTable 
+              reviews={filteredReviews} 
+              onFeedback={handleFeedback} 
+              totalCount={MOCK_REVIEWS.length} 
+            />
           </div>
-        </footer>
+        </main>
       </div>
     </div>
   );

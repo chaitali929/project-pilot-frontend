@@ -21,6 +21,7 @@ import NewProject from "./pages/NewProject";
 import Notifications from "./components/Sidebar/notifications";
 import MentorDashboard from "./pages/mentorDasboard";
 import MentorReview from "./components/MentorDashbord/Review";
+import MentorGroups from "./components/MentorDashbord/Group";
 
 function App() {
   return (
@@ -57,6 +58,7 @@ function App() {
 
           {/* Mentor Dashboard */}
           <Route path="/MentorDashboard/Review" element={<MentorReview />} />
+          <Route path="/MentorDashboard/Groups" element={<MentorGroups />} />
           {/* 404 Fallback */}
           <Route
             path="*"

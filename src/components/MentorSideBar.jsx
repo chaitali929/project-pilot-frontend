@@ -1,10 +1,8 @@
 import React from "react";
 import { NavLink } from "react-router-dom";
-import { MdDashboard, MdTopic, MdNotifications, MdGroup, } from "react-icons/md";
-import { FaTasks } from "react-icons/fa";
+import { MdDashboard, MdNotifications, MdGroup } from "react-icons/md";
 import { HiOutlineDocumentReport } from "react-icons/hi";
-
-import { FiPackage, FiUser, FiSliders, FiHelpCircle } from "react-icons/fi";
+import { FiBook, FiUser, FiSliders, FiHelpCircle } from "react-icons/fi";
 
 export default function MentorSidebar({ isMobile = false, onClose }) {
   const linkClasses = ({ isActive }) =>
@@ -42,35 +40,32 @@ export default function MentorSidebar({ isMobile = false, onClose }) {
 
       {/* Nav Links */}
       <nav className="p-4 flex-1 overflow-auto text-sm space-y-1">
-        <NavLink to="/StudentDashboard" className={linkClasses} end>
+        <NavLink to="/MentorDashboard" className={linkClasses} end>
           <MdDashboard className="w-5 h-5" />
           Dashboard
         </NavLink>
 
-        <NavLink to="/StudentDashboard/Taskboard" className={linkClasses}>
-          <FaTasks className="w-5 h-5" />
+        <NavLink to="/MentorDashboard/Groups" className={linkClasses}>
+          <MdGroup className="w-5 h-5" />
           Groups
         </NavLink>
 
         <NavLink to="/MentorDashboard/Review" className={linkClasses}>
-          <MdGroup className="w-5 h-5" />
-          Reviews
+          <HiOutlineDocumentReport className="w-5 h-5" />
+          Review
         </NavLink>
 
-       <NavLink to="/StudentDashboard/Topics" className={linkClasses}>
-          <MdTopic className="w-5 h-5" />
-          Projet Dairy
+        <NavLink to="/MentorDashboard/ProjectDiary" className={linkClasses}>
+          <FiBook className="w-5 h-5" />
+          Project Diary
         </NavLink>
 
-              
-       <NavLink to="/StudentDashboard/Notifications" className={linkClasses}>
-         <MdNotifications className="w-5 h-5" />
+        <NavLink to="/MentorDashboard/Notifications" className={linkClasses}>
+          <MdNotifications className="w-5 h-5" />
           Notifications
         </NavLink>
 
-      
-
-<hr className="my-3" />
+      <hr className="my-3" />
 
 <div className="mt-4">
   <p className="px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
@@ -86,7 +81,7 @@ export default function MentorSidebar({ isMobile = false, onClose }) {
     <li>
       <button className="w-full flex items-center gap-3 text-left px-4 py-2 rounded-lg hover:bg-gray-100">
         <FiSliders className="w-5 h-5 text-gray-600" />
-        <span className="text-gray-700">Preference</span>
+        <span className="text-gray-700">Preferences</span>
       </button>
     </li>
     <li>
