@@ -24,6 +24,11 @@ import MentorReview from "./components/MentorDashbord/Review";
 import MentorGroups from "./components/MentorDashbord/Group";
 import MentorProjectDiary from "./components/MentorDashbord/ProjectDiary";
 import MentorNotifications from "./components/MentorDashbord/Notification";
+import CoordinatorDashboard from "./pages/CoordinatorDashboard";
+import CoMentor from "./components/Coordinator/Co_Mentor";
+import CoMentorPage from "./pages/CoMentorPage";
+import TeamPage from "./pages/TeamPage";
+import StudentsPage from "./pages/StudentsPage";
 
 function App() {
   return (
@@ -46,6 +51,7 @@ function App() {
           {/* Dashboard */}
           <Route path="/StudentDashboard" element={<StudentDashboard />} />
           <Route path="/MentorDashboard" element={<MentorDashboard/>}/>
+          <Route path="/CoordinatorDashboard" element={<CoordinatorDashboard/>}/>
 
           {/* Taskboard page */}
           <Route path="/StudentDashboard/Taskboard" element={<Taskboard />} />
@@ -63,6 +69,12 @@ function App() {
           <Route path="/MentorDashboard/Groups" element={<MentorGroups />} />
           <Route path="/MentorDashboard/ProjectDiary" element={<MentorProjectDiary />} />
           <Route path="/MentorDashboard/Notifications" element={<MentorNotifications />} />
+
+          {/* Coordinator Dashboard Routes */}
+          <Route path="/CoordinatorDashboard/TeamsManagement" element={<TeamPage />} />
+          <Route path="/CoordinatorDashboard/Students" element={<StudentsPage />} />
+          <Route path="/CoordinatorDashboard/Mentors" element={<CoMentorPage />} />
+          <Route path="/CoordinatorDashboard/Administration" element={<div>Administration</div>} />
           {/* 404 Fallback */}
           <Route
             path="*"
