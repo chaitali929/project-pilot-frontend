@@ -118,7 +118,9 @@ export default function Groups() {
 
   const getGroupStatus = (group) => {
     const acceptedCount = group.members?.filter(m => m.status === 'accepted').length || 0;
-    return acceptedCount >= group.maxMembers ? 'Full' : 'Open';
+    // Add 1 for admin if admin is not already counted in members
+    const totalMembers = acceptedCount + 1; // +1 for admin
+    return totalMembers >= group.maxMembers ? 'Full' : 'Open';
   };
 
   const getUserGroupStatus = (group) => {
@@ -236,6 +238,7 @@ export default function Groups() {
                     ) : (
                       groups.map((group, index) => {
                         const acceptedMembers = group.members?.filter(m => m.status === 'accepted').length || 0;
+                        const totalMembers = acceptedMembers + 1; // +1 for admin
                         const status = getGroupStatus(group);
                         const userGroupStatus = getUserGroupStatus(group);
                         const isUserInThisGroup = group.members?.some(member => 
@@ -250,7 +253,7 @@ export default function Groups() {
                             }`}
                           >
                             <div className="text-gray-800">{group.groupName}</div>
-                            <div className="text-gray-600">{acceptedMembers}/{group.maxMembers}</div>
+                            <div className="text-gray-600">{totalMembers}/{group.maxMembers}</div>
                             <div>
                               <span
                                 className={`inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-medium ${

@@ -1,0 +1,118 @@
+/* ZenCode Syntax Highlighting Theme */
+.token.comment,
+.token.prolog,
+.token.doctype,
+.token.cdata {
+  color: #5C6370 !important;
+  font-style: italic;
+}
+
+.token.punctuation {
+  color: #ABB2BF !important;
+}
+
+.token.property,
+.token.tag,
+.token.constant,
+.token.symbol,
+.token.deleted {
+  color: #E06C75 !important;
+}
+
+.token.boolean,
+.token.number {
+  color: #D19A66 !important;
+}
+
+.token.selector,
+.token.attr-name,
+.token.string,
+.token.char,
+.token.builtin,
+.token.inserted {
+  color: #98C379 !important;
+}
+
+.token.operator,
+.token.entity,
+.token.url,
+.language-css .token.string,
+.style .token.string,
+.token.variable {
+  color: #56B6C2 !important;
+}
+
+.token.atrule,
+.token.attr-value,
+.token.function,
+.token.class-name {
+  color: #61AFEF !important;
+}
+
+.token.keyword {
+  color: #C678DD !important;
+  font-weight: 500;
+}
+
+.token.regex,
+.token.important {
+  color: #E06C75 !important;
+}
+
+.token.important,
+.token.bold {
+  font-weight: bold;
+}
+
+.token.italic {
+  font-style: italic;
+}
+
+/* Language-specific tokens */
+.language-javascript .token.keyword {
+  color: #C678DD !important;
+}
+
+.language-javascript .token.function {
+  color: #61AFEF !important;
+}
+
+.language-javascript .token.class-name {
+  color: #E5C07B !important;
+}
+
+.language-python .token.keyword {
+  color: #C678DD !important;
+}
+
+.language-python .token.function {
+  color: #61AFEF !important;
+}
+
+.language-python .token.class-name {
+  color: #E5C07B !important;
+}
+
+.language-typescript .token.keyword {
+  color: #C678DD !important;
+}
+
+.language-css .token.property {
+  color: #D19A66 !important;
+}
+
+.language-json .token.property {
+  color: #D19A66 !important;
+}
+
+.language-markup .token.tag {
+  color: #E06C75 !important;
+}
+
+.language-markup .token.attr-name {
+  color: #D19A66 !important;
+}
+
+.language-markup .token.attr-value {
+  color: #98C379 !important;
+}

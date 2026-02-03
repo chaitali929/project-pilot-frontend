@@ -18,6 +18,7 @@ import Reports from "./components/Sidebar/Reports";
 import Workspace from "./components/Sidebar/Workspace";
 import GroupDetails from "./components/CreatedGroup"
 import NewProject from "./pages/NewProject";
+import WorkspaceView from "./components/workspaceView";
 import Notifications from "./components/Sidebar/notifications";
 import MentorDashboard from "./pages/mentorDasboard";
 import MentorReview from "./components/MentorDashbord/Review";
@@ -54,6 +55,7 @@ function App() {
           <Route path="/StudentDashboard/Topics" element={<Topics />} />
           <Route path="/StudentDashboard/Reports" element={<Reports />} />
           <Route path="/StudentDashboard/Workspace" element={<Workspace />} />
+          <Route path="/StudentDashboard/Workspace/view/:workspaceId" element={<WorkspaceView />} />
           <Route path="/StudentDashboard/Notifications" element={<Notifications />} />
           <Route path="/StudentDashboard/Workspace/NewProject" element={<NewProject />} />
         

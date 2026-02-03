@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
 
 const api = axios.create({
   baseURL: API_BASE_URL,
@@ -46,6 +46,26 @@ export const taskAPI = {
   getGroupTasks: (groupId) => api.get(`/api/tasks/group/${groupId}`),
   inviteAssignees: (taskId, userIds) => api.post(`/api/tasks/invite/${taskId}`, { userIds }),
   updateTaskStatus: (taskId, status) => api.patch(`/api/tasks/status/${taskId}`, { status }),
+};
+
+export const workspaceAPI = {
+  createWorkspace: (workspaceData) => api.post('/api/workspaces/create', workspaceData),
+  uploadFiles: (workspaceId, files) => {
+    const formData = new FormData();
+    for (let i = 0; i < files.length; i++) {
+      formData.append('files', files[i]);
+    }
+    return api.post(`/api/workspaces/upload/${workspaceId}`, formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+      timeout: 120000 // 2 minutes for file uploads
+    });
+  },
+  addComment: (workspaceId, message) => api.post(`/api/workspaces/${workspaceId}/comments`, { message }),
+  deleteComment: (workspaceId, commentId) => api.delete(`/api/workspaces/${workspaceId}/comments/${commentId}`),
+  getGroupWorkspaces: (groupId) => api.get(`/api/workspaces/group/${groupId}`),
+  getWorkspaceById: (workspaceId) => api.get(`/api/workspaces/${workspaceId}`),
+  getWorkspaceFiles: (workspaceId) => api.get(`/api/workspaces/${workspaceId}/files`),
+  retryClone: (workspaceId) => api.post(`/api/workspaces/${workspaceId}/retry-clone`),
 };
 
 export default api;
