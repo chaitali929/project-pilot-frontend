@@ -16,6 +16,7 @@ import {
 } from 'lucide-react';
 import MentorSideBar from "../MentorSideBar";
 import Topbar from "../Topbar";
+import ProjectDiary1Modal from './ProjectDiary1';
 
 const MOCK_DATA = [
   { id: 1, team: 'Group No.1', week: 'Week-5', dates: 'Oct-14-20', summary: 'Completed the backend API integration for real-time location tracking. Implemented WebSocket connection for live updates and tested with', pow: 'pow.pdf', type: 'pdf', status: 'Reviewed', grade: '+8' },
@@ -56,6 +57,18 @@ const StatusBadge = ({ status }) => {
 };
 
 export default function MentorProjectDiary() {
+  const [showDiaryModal, setShowDiaryModal] = useState(false);
+  const [selectedTeam, setSelectedTeam] = useState(null);
+
+  const handleActionClick = (item) => {
+    setSelectedTeam(item.team);
+    setShowDiaryModal(true);
+  };
+
+  const handleCloseDiaryModal = () => {
+    setShowDiaryModal(false);
+    setSelectedTeam(null);
+  };
   return (
     <div className="min-h-screen flex bg-gray-50">
       <MentorSideBar />
@@ -164,7 +177,10 @@ export default function MentorProjectDiary() {
                     <span className="font-bold text-lg text-slate-700">{item.grade}</span>
                   </td>
                   <td className="px-6 py-4 text-center">
-                    <button className="p-2 border border-slate-200 rounded-lg text-slate-500 hover:text-slate-700 hover:bg-slate-50 transition-all">
+                    <button 
+                      onClick={() => handleActionClick(item)}
+                      className="p-2 border border-slate-200 rounded-lg text-slate-500 hover:text-slate-700 hover:bg-slate-50 transition-all"
+                    >
                       <Edit3 size={16} />
                     </button>
                   </td>
@@ -176,6 +192,13 @@ export default function MentorProjectDiary() {
           </div>
         </main>
       </div>
+
+      {/* ProjectDiary1 Modal */}
+      <ProjectDiary1Modal 
+        isOpen={showDiaryModal}
+        onClose={handleCloseDiaryModal}
+        teamName={selectedTeam || "Group No.4"}
+      />
     </div>
   );
 }

@@ -2,6 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { Search, Filter, X, CheckCircle2, Clock, AlertCircle } from 'lucide-react';
 import MentorSideBar from "../MentorSideBar";
 import Topbar from "../Topbar";
+import ProjectModal from "./TeamViewGroup";
 
 // --- Constants & Types ---
 const TeamStatus = {
@@ -28,6 +29,18 @@ export default function MentorGroups() {
     TeamStatus.INACTIVE,
     TeamStatus.COMPLETED
   ]);
+  const [selectedTeam, setSelectedTeam] = useState(null);
+  const [showModal, setShowModal] = useState(false);
+
+  const handleTeamClick = (team) => {
+    setSelectedTeam({ name: team.name, id: team.id });
+    setShowModal(true);
+  };
+
+  const handleCloseModal = () => {
+    setShowModal(false);
+    setSelectedTeam(null);
+  };
 
   const filteredTeams = useMemo(() => {
     return INITIAL_TEAMS.filter(team => {
@@ -145,9 +158,12 @@ export default function MentorGroups() {
                           <tr key={team.id} className="group hover:bg-blue-50/30 transition-colors">
                             <td className="px-8 py-6 whitespace-nowrap">
                               <div className="flex flex-col">
-                                <span className="text-base font-bold text-gray-900 group-hover:text-blue-600 transition-colors">
+                                <button 
+                                  onClick={() => handleTeamClick(team)}
+                                  className="text-base font-bold text-gray-900 group-hover:text-blue-600 transition-colors cursor-pointer hover:underline text-left"
+                                >
                                   {team.name}
-                                </span>
+                                </button>
                                 <span className="text-xs text-gray-500 font-medium">
                                   {team.members} Members Assigned
                                 </span>
@@ -210,6 +226,13 @@ export default function MentorGroups() {
           </div>
         </main>
       </div>
+
+      {/* Team Projects Modal */}
+      <ProjectModal 
+        isOpen={showModal}
+        onClose={handleCloseModal}
+        team={selectedTeam}
+      />
     </div>
   );
 }

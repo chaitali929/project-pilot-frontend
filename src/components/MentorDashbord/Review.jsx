@@ -2,6 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { Search, Filter, MessageSquare, ChevronLeft, ChevronRight, ExternalLink } from 'lucide-react';
 import MentorSideBar from "../MentorSideBar";
 import Topbar from "../Topbar";
+import { ProjectApprovalModal } from './ViewDoc';
 
 // --- Types & Constants ---
 const SubmissionStatus = {
@@ -193,6 +194,8 @@ const ReviewTable = ({ reviews, onFeedback, totalCount }) => {
 export default function MentorReview() {
   const [searchQuery, setSearchQuery] = useState('');
   const [notification, setNotification] = useState(null);
+  const [showViewDoc, setShowViewDoc] = useState(false);
+  const [selectedTeam, setSelectedTeam] = useState(null);
 
   const filteredReviews = useMemo(() => {
     const lowerQuery = searchQuery.toLowerCase();
@@ -205,8 +208,13 @@ export default function MentorReview() {
   }, [searchQuery]);
 
   const handleFeedback = (teamName) => {
-    setNotification(`Review panel for ${teamName} will be available shortly.`);
-    setTimeout(() => setNotification(null), 3000);
+    setSelectedTeam({ name: teamName, project: 'Sample Project' });
+    setShowViewDoc(true);
+  };
+
+  const handleCloseViewDoc = () => {
+    setShowViewDoc(false);
+    setSelectedTeam(null);
   };
 
   return (
@@ -247,6 +255,17 @@ export default function MentorReview() {
           </div>
         </main>
       </div>
+
+      {/* ViewDoc Modal */}
+      {showViewDoc && (
+        <ProjectApprovalModal 
+          isOpen={showViewDoc}
+          onClose={handleCloseViewDoc}
+          teamName={selectedTeam?.name || ""}
+          projectName={selectedTeam?.project || "Sample Project"}
+          projectDescription="Project submission for review and feedback"
+        />
+      )}
     </div>
   );
 }
