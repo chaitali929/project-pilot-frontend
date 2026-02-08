@@ -170,10 +170,28 @@ const GroupDashboard = ({ userGroup, isUserAdmin, allMembers, pendingRequests })
           <div className="space-y-6">
             <h2 className="text-2xl font-bold">Mentor</h2>
             <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex items-center gap-4">
-              <div className="w-12 h-12 rounded-full bg-orange-200 flex items-center justify-center text-orange-700 font-bold">
-                P
-              </div>
-              <span className="text-xl font-semibold">Prof. Archana Mate</span>
+              {userGroup.mentor?.email ? (
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center text-green-600 font-bold text-lg">
+                    {userGroup.mentor.email.charAt(0).toUpperCase()}
+                  </div>
+                  <span className="text-xl font-semibold">{userGroup.mentor.email.replace('@gmail.com', '')}</span>
+                </div>
+              ) : userGroup.mentor ? (
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center text-green-600 font-bold text-lg">
+                    M
+                  </div>
+                  <span className="text-xl font-semibold">Mentor Assigned</span>
+                </div>
+              ) : (
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 rounded-full bg-gray-200 flex items-center justify-center text-gray-500 font-bold text-lg">
+                    ?
+                  </div>
+                  <span className="text-xl font-semibold text-gray-500">No Mentor Assigned</span>
+                </div>
+              )}
             </div>
 
             <div className="bg-white p-8 rounded-2xl shadow-sm border border-gray-100">

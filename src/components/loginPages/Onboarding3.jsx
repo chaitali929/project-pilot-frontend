@@ -1,8 +1,25 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import useUserStore from "../../store/userStore";
 
 const Onboarding3 = () => {
   const navigate = useNavigate();
+  const { user, initializeUser } = useUserStore();
+
+  useEffect(() => {
+    initializeUser();
+  }, []);
+
+  const handleGetStarted = () => {
+    console.log('User data:', user); // Debug log
+    if (user?.role === 'coordinator') {
+      navigate('/CoordinatorDashboard');
+    } else if (user?.role === 'mentor') {
+      navigate('/MentorDashboard');
+    } else {
+      navigate('/StudentDashboard');
+    }
+  };
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-white px-4">
@@ -40,7 +57,7 @@ const Onboarding3 = () => {
       </div>
 
       <button 
-        onClick={() => navigate('/StudentDashboard')}
+        onClick={handleGetStarted}
         className="bg-blue-600 text-white py-3 px-8 rounded-lg text-lg font-medium hover:bg-blue-700 transition"
       >
         Get Started

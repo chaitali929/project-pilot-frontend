@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   ChevronDown, 
   ChevronUp, 
@@ -7,6 +7,8 @@ import {
   AlertCircle,
   Sparkles
 } from 'lucide-react';
+import useCoordinatorStore from '../../store/coordinatorStore';
+import GroupActionModal from './GroupActionModal';
 
 const App = () => {
   const [expandedSections, setExpandedSections] = useState({
@@ -14,6 +16,24 @@ const App = () => {
     TE: true,
     SE: true
   });
+  const [modalOpen, setModalOpen] = useState(false);
+  const [selectedGroup, setSelectedGroup] = useState(null);
+  
+  const { groupsByYear, fetchGroups, isLoading, error } = useCoordinatorStore();
+
+  useEffect(() => {
+    fetchGroups();
+  }, [fetchGroups]);
+
+  const handleEditClick = (group) => {
+    setSelectedGroup(group);
+    setModalOpen(true);
+  };
+
+  const closeModal = () => {
+    setModalOpen(false);
+    setSelectedGroup(null);
+  };
 
   const toggleSection = (section) => {
     setExpandedSections(prev => ({
@@ -120,11 +140,14 @@ const App = () => {
                       </span>
                     </div>
                   </td>
-                  <td className="px-6 py-4 text-right">
-                    <button className="p-2 text-slate-300 hover:text-indigo-600 transition-colors">
-                      <Edit3 size={16} />
-                    </button>
-                  </td>
+                    <td className="px-6 py-4 text-right">
+                      <button 
+                        onClick={() => handleEditClick(group)}
+                        className="p-2 text-slate-300 hover:text-indigo-600 transition-colors"
+                      >
+                        <Edit3 size={16} />
+                      </button>
+                    </td>
                 </tr>
               ))}
             </tbody>
@@ -202,6 +225,12 @@ const App = () => {
         </div>
 
       </div>
+      
+      <GroupActionModal 
+        isOpen={modalOpen}
+        onClose={closeModal}
+        group={selectedGroup}
+      />
     </div>
   );
 };

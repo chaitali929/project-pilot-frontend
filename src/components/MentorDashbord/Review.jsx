@@ -1,71 +1,16 @@
-import React, { useState, useMemo } from 'react';
-import { Search, Filter, MessageSquare, ChevronLeft, ChevronRight, ExternalLink } from 'lucide-react';
+import React, { useState, useMemo, useEffect } from 'react';
+import { Search, MessageSquare, ChevronLeft, ChevronRight } from 'lucide-react';
 import MentorSideBar from "../MentorSideBar";
 import Topbar from "../Topbar";
-import { ProjectApprovalModal } from './ViewDoc';
-
-// --- Types & Constants ---
-const SubmissionStatus = {
-  PENDING: 'Pending',
-  REVIEWED: 'Reviewed',
-  NEEDS_ATTENTION: 'Needs Attention'
-};
+import useMentorStore from '../../store/mentorStore';
+import ReportViewModal from './ReportViewModal';
 
 const StatusColors = {
-  [SubmissionStatus.PENDING]: 'bg-amber-50 text-amber-700 border-amber-100',
-  [SubmissionStatus.REVIEWED]: 'bg-emerald-50 text-emerald-700 border-emerald-100',
-  [SubmissionStatus.NEEDS_ATTENTION]: 'bg-rose-50 text-rose-700 border-rose-100'
+  'sent': 'bg-yellow-50 text-yellow-700 border-yellow-100',
+  'viewed': 'bg-blue-50 text-blue-700 border-blue-100',
+  'accepted': 'bg-emerald-50 text-emerald-700 border-emerald-100',
+  'rejected': 'bg-rose-50 text-rose-700 border-rose-100'
 };
-
-const MOCK_REVIEWS = [
-  {
-    id: '1',
-    teamName: 'Team Alpha',
-    leadName: 'Sarah Chen',
-    projectName: 'Eco-Friendly Packaging Design',
-    submissionType: 'Report',
-    submittedAt: '2024-07-26T14:30:00',
-    status: SubmissionStatus.PENDING,
-  },
-  {
-    id: '2',
-    teamName: 'Team Beta',
-    leadName: 'David Lee',
-    projectName: 'Mobile App for Local Tourism',
-    submissionType: 'Prototype',
-    submittedAt: '2024-07-25T11:15:00',
-    status: SubmissionStatus.REVIEWED,
-  },
-  {
-    id: '3',
-    teamName: 'Team Gamma',
-    leadName: 'Maria Rodriguez',
-    projectName: 'Sustainable Urban Farming',
-    submissionType: 'Presentation',
-    submittedAt: '2024-07-24T16:45:00',
-    status: SubmissionStatus.NEEDS_ATTENTION,
-  },
-  {
-    id: '4',
-    teamName: 'Team Delta',
-    leadName: 'Ethan Clark',
-    projectName: 'AI-Powered Education Platform',
-    submissionType: 'Code',
-    submittedAt: '2024-07-23T09:00:00',
-    status: SubmissionStatus.PENDING,
-  },
-  {
-    id: '5',
-    teamName: 'Team Epsilon',
-    leadName: 'Olivia Brown',
-    projectName: 'Community Health Awareness',
-    submissionType: 'Report',
-    submittedAt: '2024-07-22T13:20:00',
-    status: SubmissionStatus.REVIEWED,
-  },
-];
-
-// --- Sub-components ---
 
 const StatusBadge = ({ status }) => (
   <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${StatusColors[status]}`}>
@@ -80,21 +25,17 @@ const SearchBar = ({ value, onChange }) => (
         <Search className="w-5 h-5 text-slate-400" />
         <input
           className="w-full bg-transparent border-none focus:ring-0 py-3.5 px-3 text-slate-700 placeholder-slate-400 text-sm"
-          placeholder="Search teams, projects, or leads..."
+          placeholder="Search teams or reports..."
           type="text"
           value={value}
           onChange={onChange}
         />
       </div>
-      <button className="flex items-center justify-center px-4 h-full text-slate-500 hover:text-indigo-600 border-l border-slate-100 transition-colors">
-        <Filter className="w-4 h-4 mr-2" />
-        <span className="text-sm font-medium">Filters</span>
-      </button>
     </div>
   </div>
 );
 
-const ReviewTable = ({ reviews, onFeedback, totalCount }) => {
+const ReviewTable = ({ reports, onFeedback, isLoading }) => {
   const formatDate = (dateStr) => {
     const date = new Date(dateStr);
     return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
@@ -105,62 +46,60 @@ const ReviewTable = ({ reviews, onFeedback, totalCount }) => {
     return date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false });
   };
 
+  if (isLoading) {
+    return (
+      <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm p-16 text-center">
+        <p className="text-slate-500">Loading reports...</p>
+      </div>
+    );
+  }
+
   return (
     <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm">
       <div className="overflow-x-auto">
         <table className="w-full text-left border-collapse">
           <thead>
             <tr className="bg-slate-50/50">
-              <th className="px-6 py-4 text-[12px] font-bold uppercase tracking-wider text-slate-500">Team & Lead</th>
-              <th className="px-6 py-4 text-[12px] font-bold uppercase tracking-wider text-slate-500">Project</th>
-              <th className="px-6 py-4 text-[12px] font-bold uppercase tracking-wider text-slate-500">Type</th>
+              <th className="px-6 py-4 text-[12px] font-bold uppercase tracking-wider text-slate-500">Team</th>
+              <th className="px-6 py-4 text-[12px] font-bold uppercase tracking-wider text-slate-500">Report Title</th>
               <th className="px-6 py-4 text-[12px] font-bold uppercase tracking-wider text-slate-500">Submitted</th>
               <th className="px-6 py-4 text-[12px] font-bold uppercase tracking-wider text-slate-500">Status</th>
               <th className="px-6 py-4 text-[12px] font-bold uppercase tracking-wider text-slate-500 text-right">Actions</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100">
-            {reviews.map((review) => (
-              <tr key={review.id} className="group hover:bg-slate-50/50 transition-colors">
+            {reports.map((report) => (
+              <tr key={report._id} className="group hover:bg-slate-50/50 transition-colors">
                 <td className="px-6 py-4">
-                  <div className="text-sm font-semibold text-slate-900">{review.teamName}</div>
-                  <div className="text-xs text-slate-500">{review.leadName}</div>
+                  <div className="text-sm font-semibold text-slate-900">{report.groupId?.groupName || 'Unknown'}</div>
                 </td>
                 <td className="px-6 py-4">
-                  <div className="flex items-center text-sm text-indigo-600 font-medium hover:text-indigo-800 transition-colors cursor-pointer">
-                    {review.projectName}
-                    <ExternalLink className="w-3 h-3 ml-1.5 opacity-0 group-hover:opacity-100 transition-opacity" />
-                  </div>
+                  <div className="text-sm text-slate-900 font-medium">{report.reportTitle}</div>
                 </td>
                 <td className="px-6 py-4">
-                  <span className="text-sm text-slate-600 bg-slate-100 px-2 py-1 rounded text-[11px] font-bold uppercase tracking-tight">
-                    {review.submissionType}
-                  </span>
+                  <div className="text-sm text-slate-600 font-medium">{formatDate(report.createdAt)}</div>
+                  <div className="text-xs text-slate-400">{formatTime(report.createdAt)}</div>
                 </td>
                 <td className="px-6 py-4">
-                  <div className="text-sm text-slate-600 font-medium">{formatDate(review.submittedAt)}</div>
-                  <div className="text-xs text-slate-400">{formatTime(review.submittedAt)}</div>
-                </td>
-                <td className="px-6 py-4">
-                  <StatusBadge status={review.status} />
+                  <StatusBadge status={report.status} />
                 </td>
                 <td className="px-6 py-4 text-right">
                   <button 
-                    onClick={() => onFeedback(review.teamName)}
+                    onClick={() => onFeedback(report)}
                     className="inline-flex items-center px-3 py-1.5 text-sm font-semibold text-slate-600 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-all"
                   >
                     <MessageSquare className="w-4 h-4 mr-2" />
-                    Feedback
+                    Review
                   </button>
                 </td>
               </tr>
             ))}
-            {reviews.length === 0 && (
+            {reports.length === 0 && (
               <tr>
-                <td colSpan={6} className="px-6 py-16 text-center">
+                <td colSpan={5} className="px-6 py-16 text-center">
                   <div className="flex flex-col items-center justify-center text-slate-400">
                     <Search className="w-10 h-10 mb-2 opacity-20" />
-                    <p className="text-sm">No submissions found matching your search criteria.</p>
+                    <p className="text-sm">No reports found.</p>
                   </div>
                 </td>
               </tr>
@@ -170,51 +109,42 @@ const ReviewTable = ({ reviews, onFeedback, totalCount }) => {
       </div>
       <div className="px-6 py-4 bg-slate-50/50 border-t border-slate-100 flex items-center justify-between">
         <p className="text-xs text-slate-500 font-medium">
-          Showing <span className="text-slate-900 font-bold">{reviews.length}</span> of <span className="text-slate-900 font-bold">{totalCount}</span> results
+          Showing <span className="text-slate-900 font-bold">{reports.length}</span> reports
         </p>
-        <div className="flex items-center space-x-2">
-          <button className="p-2 text-slate-400 hover:text-slate-600 disabled:opacity-30 transition-colors" disabled>
-            <ChevronLeft className="w-5 h-5" />
-          </button>
-          <div className="flex space-x-1">
-             <button className="px-3 py-1 text-xs font-bold rounded bg-indigo-600 text-white shadow-sm">1</button>
-             <button className="px-3 py-1 text-xs font-bold rounded text-slate-600 hover:bg-slate-200 transition-colors">2</button>
-          </div>
-          <button className="p-2 text-slate-400 hover:text-slate-600 transition-colors">
-            <ChevronRight className="w-5 h-5" />
-          </button>
-        </div>
       </div>
     </div>
   );
 };
 
-// --- Main App Component ---
-
 export default function MentorReview() {
   const [searchQuery, setSearchQuery] = useState('');
-  const [notification, setNotification] = useState(null);
   const [showViewDoc, setShowViewDoc] = useState(false);
-  const [selectedTeam, setSelectedTeam] = useState(null);
+  const [selectedReport, setSelectedReport] = useState(null);
 
-  const filteredReviews = useMemo(() => {
+  const { reports, fetchReports, isLoading } = useMentorStore();
+
+  useEffect(() => {
+    fetchReports();
+  }, [fetchReports]);
+
+  const filteredReports = useMemo(() => {
     const lowerQuery = searchQuery.toLowerCase();
-    return MOCK_REVIEWS.filter(
-      (review) =>
-        review.teamName.toLowerCase().includes(lowerQuery) ||
-        review.leadName.toLowerCase().includes(lowerQuery) ||
-        review.projectName.toLowerCase().includes(lowerQuery)
+    return reports.filter(
+      (report) =>
+        report.groupId?.groupName?.toLowerCase().includes(lowerQuery) ||
+        report.reportTitle?.toLowerCase().includes(lowerQuery)
     );
-  }, [searchQuery]);
+  }, [reports, searchQuery]);
 
-  const handleFeedback = (teamName) => {
-    setSelectedTeam({ name: teamName, project: 'Sample Project' });
+  const handleFeedback = (report) => {
+    setSelectedReport(report);
     setShowViewDoc(true);
   };
 
   const handleCloseViewDoc = () => {
     setShowViewDoc(false);
-    setSelectedTeam(null);
+    setSelectedReport(null);
+    fetchReports();
   };
 
   return (
@@ -226,44 +156,29 @@ export default function MentorReview() {
 
         <main className="p-6 overflow-auto">
           <div className="max-w-7xl mx-auto">
-            {/* Header */}
             <div className="flex justify-between items-center mb-6">
-              <h1 className="text-2xl font-semibold">Review Submissions</h1>
+              <h1 className="text-2xl font-semibold">Review Reports</h1>
             </div>
 
-            {/* Notification */}
-            {notification && (
-              <div className="mb-6 p-4 bg-indigo-50 border border-indigo-200 rounded-xl text-indigo-700 text-sm">
-                {notification}
-              </div>
-            )}
-
-            {/* Search Bar */}
             <div className="mb-6">
-              <SearchBar 
-                value={searchQuery} 
-                onChange={(e) => setSearchQuery(e.target.value)} 
-              />
+              <SearchBar value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} />
             </div>
 
-            {/* Review Table */}
             <ReviewTable 
-              reviews={filteredReviews} 
-              onFeedback={handleFeedback} 
-              totalCount={MOCK_REVIEWS.length} 
+              reports={filteredReports} 
+              onFeedback={handleFeedback}
+              isLoading={isLoading}
             />
           </div>
         </main>
       </div>
 
-      {/* ViewDoc Modal */}
-      {showViewDoc && (
-        <ProjectApprovalModal 
+      {showViewDoc && selectedReport && (
+        <ReportViewModal 
           isOpen={showViewDoc}
           onClose={handleCloseViewDoc}
-          teamName={selectedTeam?.name || ""}
-          projectName={selectedTeam?.project || "Sample Project"}
-          projectDescription="Project submission for review and feedback"
+          report={selectedReport}
+          teamName={selectedReport.groupId?.groupName || 'Unknown Team'}
         />
       )}
     </div>

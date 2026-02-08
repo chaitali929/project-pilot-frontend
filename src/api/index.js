@@ -68,4 +68,38 @@ export const workspaceAPI = {
   retryClone: (workspaceId) => api.post(`/api/workspaces/${workspaceId}/retry-clone`),
 };
 
+export const coordinatorAPI = {
+  getGroups: () => api.get('/api/coordinator/groups'),
+  getMentors: () => api.get('/api/coordinator/mentors'),
+  assignMentors:(groupId,mentorId)=>api.post('/api/coordinator/assign-mentor',{groupId,mentorId}),
+  removeGroup:(groupId)=>api.post(`/api/coordinator/remove-group/${groupId}`),
+  postTopic: (topicData) => api.post('/api/topics/post-topic', topicData, {
+    headers: { 'Content-Type': 'multipart/form-data' }
+  }),
+  getTopics: (groupId) => api.get(`/api/topics/${groupId}`),
+  respondToTopic: (topicId, status, mentorFeedback) => api.post(`/api/topics/respond/${topicId}`, {status, mentorFeedback}),
+  postReport: (reportData) => api.post('/api/reports/submit-report', reportData, {
+    headers: { 'Content-Type': 'multipart/form-data' }
+  }),
+  getReports: (groupId) => api.get(`/api/reports/${groupId}`),
+  respondToReport: (reportId, status, mentorFeedback) => api.post(`/api/reports/respond/${reportId}`, {status, mentorFeedback}),
+};
+
+
+export const mentorAPI = {
+  getGroups: () => api.get('/api/mentor/groups'),
+  getTopics: () => api.get('/api/mentor/topics'),
+  getTopicsByGroup: (groupId) => api.get(`/api/mentor/topics/group/${groupId}`),
+  respondToTopic: (topicId, status, mentorFeedback) => api.post(`/api/topics/respond/${topicId}`, {status, mentorFeedback}),
+  getReports: () => api.get('/api/mentor/reports'),
+  getReportsByGroup: (groupId) => api.get(`/api/mentor/reports/group/${groupId}`),
+  respondToReport: (reportId, status, mentorFeedback) => api.post(`/api/reports/respond/${reportId}`, {status, mentorFeedback}),
+  markReportViewed: (reportId) => api.post(`/api/mentor/reports/mark-viewed/${reportId}`),
+};
+
+export const TopicAPI = {
+  postTopic:(topicData)=>api.post('/api/topics/post-topic',topicData),
+  getTopics:(mentorId)=>api.get(`/api/mentor/topics/${mentorId}`),
+};
+
 export default api;

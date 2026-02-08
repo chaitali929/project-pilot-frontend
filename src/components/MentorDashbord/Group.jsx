@@ -1,28 +1,18 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { Search, Filter, X, CheckCircle2, Clock, AlertCircle } from 'lucide-react';
 import MentorSideBar from "../MentorSideBar";
 import Topbar from "../Topbar";
 import ProjectModal from "./TeamViewGroup";
+import useMentorStore from '../../store/mentorStore';
 
-// --- Constants & Types ---
 const TeamStatus = {
   ACTIVE: 'Active',
   INACTIVE: 'Inactive',
   COMPLETED: 'Completed'
 };
 
-const INITIAL_TEAMS = [
-  { id: 1, name: 'Alpha Squad', leader: 'Sarah Jenkins', members: 5, status: TeamStatus.ACTIVE, project: 'Cloud Migration', progress: 65, avatar: 'https://i.pravatar.cc/150?u=sarah' },
-  { id: 2, name: 'Beta Force', leader: 'Michael Chen', members: 3, status: TeamStatus.INACTIVE, project: 'Legacy Cleanup', progress: 12, avatar: 'https://i.pravatar.cc/150?u=michael' },
-  { id: 3, name: 'Gamma Rays', leader: 'Elena Rodriguez', members: 8, status: TeamStatus.COMPLETED, project: 'Mobile Auth', progress: 100, avatar: 'https://i.pravatar.cc/150?u=elena' },
-  { id: 4, name: 'Delta Team', leader: 'David Smith', members: 4, status: TeamStatus.ACTIVE, project: 'UI Redesign', progress: 45, avatar: 'https://i.pravatar.cc/150?u=david' },
-  { id: 5, name: 'Echo Units', leader: 'Aisha Khan', members: 6, status: TeamStatus.ACTIVE, project: null, progress: 0, avatar: 'https://i.pravatar.cc/150?u=aisha' },
-  { id: 6, name: 'Omega Group', leader: 'James Wilson', members: 2, status: TeamStatus.COMPLETED, project: 'Data Sync', progress: 100, avatar: 'https://i.pravatar.cc/150?u=james' },
-  { id: 7, name: 'Falcon 9', leader: 'Linda Wu', members: 5, status: TeamStatus.INACTIVE, project: 'API Gateway', progress: 5, avatar: 'https://i.pravatar.cc/150?u=linda' },
-  { id: 8, name: 'Zenith', leader: 'Robert Taylor', members: 7, status: TeamStatus.ACTIVE, project: 'Security Audit', progress: 88, avatar: 'https://i.pravatar.cc/150?u=robert' },
-];
-
 export default function MentorGroups() {
+  const { groups, fetchGroups, isLoading } = useMentorStore();
   const [searchQuery, setSearchQuery] = useState('');
   const [activeFilters, setActiveFilters] = useState([
     TeamStatus.ACTIVE,
@@ -32,8 +22,12 @@ export default function MentorGroups() {
   const [selectedTeam, setSelectedTeam] = useState(null);
   const [showModal, setShowModal] = useState(false);
 
+  useEffect(() => {
+    fetchGroups();
+  }, [fetchGroups]);
+
   const handleTeamClick = (team) => {
-    setSelectedTeam({ name: team.name, id: team.id });
+    setSelectedTeam({ name: team.groupName, id: team._id });
     setShowModal(true);
   };
 
@@ -42,18 +36,27 @@ export default function MentorGroups() {
     setSelectedTeam(null);
   };
 
+  const getTeamStatus = (group) => {
+    const acceptedMembers = group.members?.filter(m => m.status === 'accepted').length || 0;
+    if (acceptedMembers >= group.maxMembers) return TeamStatus.COMPLETED;
+    if (acceptedMembers > 0) return TeamStatus.ACTIVE;
+    return TeamStatus.INACTIVE;
+  };
+
   const filteredTeams = useMemo(() => {
-    return INITIAL_TEAMS.filter(team => {
+    return groups.filter(group => {
       const query = searchQuery.toLowerCase();
-      const matchesSearch = 
-        team.name.toLowerCase().includes(query) ||
-        team.leader.toLowerCase().includes(query) ||
-        (team.project?.toLowerCase().includes(query) ?? false);
+      const status = getTeamStatus(group);
+      const leaderName = group.admin?.name || '';
       
-      const matchesFilter = activeFilters.includes(team.status);
+      const matchesSearch = 
+        group.groupName.toLowerCase().includes(query) ||
+        leaderName.toLowerCase().includes(query);
+      
+      const matchesFilter = activeFilters.includes(status);
       return matchesSearch && matchesFilter;
     });
-  }, [searchQuery, activeFilters]);
+  }, [groups, searchQuery, activeFilters]);
 
   const toggleFilter = (status) => {
     setActiveFilters(prev => 
@@ -146,50 +149,62 @@ export default function MentorGroups() {
                       <th className="px-8 py-5 text-left text-xs font-bold text-gray-500 uppercase tracking-widest">Team Identity</th>
                       <th className="px-8 py-5 text-left text-xs font-bold text-gray-500 uppercase tracking-widest">Leadership</th>
                       <th className="px-8 py-5 text-center text-xs font-bold text-gray-500 uppercase tracking-widest">Status</th>
-                      <th className="px-8 py-5 text-left text-xs font-bold text-gray-500 uppercase tracking-widest">Current Project</th>
-                      <th className="px-8 py-5 text-left text-xs font-bold text-gray-500 uppercase tracking-widest">Progress</th>
+                      <th className="px-8 py-5 text-left text-xs font-bold text-gray-500 uppercase tracking-widest">Year/Batch</th>
+                      <th className="px-8 py-5 text-left text-xs font-bold text-gray-500 uppercase tracking-widest">Members</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-100">
-                    {filteredTeams.length > 0 ? (
-                      filteredTeams.map((team) => {
-                        const statusUI = getStatusStyles(team.status);
+                    {isLoading ? (
+                      <tr>
+                        <td colSpan={5} className="px-8 py-16 text-center">
+                          <div className="flex flex-col items-center justify-center text-gray-400">
+                            <Clock className="w-12 h-12 mb-4 opacity-20 animate-spin" />
+                            <p className="text-lg font-medium">Loading groups...</p>
+                          </div>
+                        </td>
+                      </tr>
+                    ) : filteredTeams.length > 0 ? (
+                      filteredTeams.map((group) => {
+                        const status = getTeamStatus(group);
+                        const statusUI = getStatusStyles(status);
+                        const acceptedMembers = group.members?.filter(m => m.status === 'accepted').length || 0;
+                        const leaderEmail = group.admin?.email || '';
+                        const leaderInitial = leaderEmail.charAt(0).toUpperCase();
+                        
                         return (
-                          <tr key={team.id} className="group hover:bg-blue-50/30 transition-colors">
+                          <tr key={group._id} className="group hover:bg-blue-50/30 transition-colors">
                             <td className="px-8 py-6 whitespace-nowrap">
                               <div className="flex flex-col">
                                 <button 
-                                  onClick={() => handleTeamClick(team)}
+                                  onClick={() => handleTeamClick(group)}
                                   className="text-base font-bold text-gray-900 group-hover:text-blue-600 transition-colors cursor-pointer hover:underline text-left"
                                 >
-                                  {team.name}
+                                  {group.groupName}
                                 </button>
                                 <span className="text-xs text-gray-500 font-medium">
-                                  {team.members} Members Assigned
+                                  {acceptedMembers} Members Assigned
                                 </span>
                               </div>
                             </td>
                             <td className="px-8 py-6 whitespace-nowrap">
                               <div className="flex items-center gap-3">
-                                <img
-                                  src={team.avatar}
-                                  alt={team.leader}
-                                  className="h-10 w-10 rounded-full border-2 border-white ring-2 ring-gray-100"
-                                />
+                                <div className="h-10 w-10 rounded-full border-2 border-white ring-2 ring-gray-100 bg-blue-500 flex items-center justify-center text-white font-bold">
+                                  {leaderInitial}
+                                </div>
                                 <span className="text-sm font-semibold text-gray-700">
-                                  {team.leader}
+                                  {group.admin?.name || 'Unknown'}
                                 </span>
                               </div>
                             </td>
                             <td className="px-8 py-6 whitespace-nowrap text-center">
                               <span className={`inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full text-xs font-bold ${statusUI.bg} ${statusUI.text}`}>
                                 {statusUI.icon}
-                                {team.status}
+                                {status}
                               </span>
                             </td>
                             <td className="px-8 py-6 whitespace-nowrap">
-                              <div className={`text-sm font-medium ${team.project ? 'text-gray-600' : 'text-rose-500 italic'}`}>
-                                {team.project || 'Unassigned'}
+                              <div className="text-sm font-medium text-gray-600">
+                                {group.year} - {group.currentYear}
                               </div>
                             </td>
                             <td className="px-8 py-6 whitespace-nowrap">
@@ -197,11 +212,11 @@ export default function MentorGroups() {
                                 <div className="w-full bg-gray-200 rounded-full h-2.5">
                                   <div 
                                     className="bg-blue-600 h-2.5 rounded-full transition-all" 
-                                    style={{ width: `${team.progress}%` }}
+                                    style={{ width: `${(acceptedMembers / group.maxMembers) * 100}%` }}
                                   ></div>
                                 </div>
                                 <span className="ml-3 text-sm font-medium text-gray-600 min-w-[3rem]">
-                                  {team.progress}%
+                                  {acceptedMembers}/{group.maxMembers}
                                 </span>
                               </div>
                             </td>

@@ -14,7 +14,14 @@ export default function Login() {
     e.preventDefault();
     const result = await login(formData);
     if (result.success) {
-      navigate('/StudentDashboard');
+      const { user } = useUserStore.getState();
+      if (user.role === 'coordinator') {
+        navigate('/CoordinatorDashboard');
+      } else if (user.role === 'mentor') {
+        navigate('/MentorDashboard');
+      } else {
+        navigate('/StudentDashboard');
+      }
     }
   };
 

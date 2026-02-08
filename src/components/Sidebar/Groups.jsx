@@ -8,7 +8,7 @@ import GroupDashboard from "../Detailedgroup";
 
 export default function Groups() {
   const [showCreate, setShowCreate] = useState(false);
-  const [groupForm, setGroupForm] = useState({ groupName: '', maxMembers: 4 });
+  const [groupForm, setGroupForm] = useState({ groupName: '', maxMembers: 4, year: 'SE', currentYear: '' });
   const [selectedUsers, setSelectedUsers] = useState([]);
   const navigate = useNavigate();
 
@@ -42,7 +42,7 @@ export default function Groups() {
         await inviteUsers(result.group._id, selectedUsers);
       }
       setShowCreate(false);
-      setGroupForm({ groupName: '', maxMembers: 4 });
+      setGroupForm({ groupName: '', maxMembers: 4, year: 'SE', currentYear: '' });
       setSelectedUsers([]);
       fetchGroups();
     }
@@ -368,6 +368,37 @@ export default function Groups() {
                       max="10"
                       value={groupForm.maxMembers}
                       onChange={(e) => setGroupForm({...groupForm, maxMembers: parseInt(e.target.value)})}
+                      className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring-blue-500"
+                      required
+                    />
+                  </div>
+
+                  <div className="mb-6">
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Year
+                    </label>
+                    <select
+                      value={groupForm.year}
+                      onChange={(e) => setGroupForm({...groupForm, year: e.target.value})}
+                      className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring-blue-500"
+                      required
+                    >
+                      <option value="SE">SE</option>
+                      <option value="TE">TE</option>
+                      <option value="BE">BE</option>
+                    </select>
+                  </div>
+
+                  <div className="mb-6">
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Current Year (e.g., 2025-2026)
+                    </label>
+                    <input
+                      type="text"
+                      value={groupForm.currentYear}
+                      onChange={(e) => setGroupForm({...groupForm, currentYear: e.target.value})}
+                      placeholder="2025-2026"
+                      pattern="^\d{4}-\d{4}$"
                       className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring-blue-500"
                       required
                     />

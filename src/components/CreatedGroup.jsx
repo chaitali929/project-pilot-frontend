@@ -10,7 +10,7 @@ export default function GroupDetails() {
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [showInviteModal, setShowInviteModal] = useState(false);
   const [selectedUsers, setSelectedUsers] = useState([]);
-  const [groupForm, setGroupForm] = useState({ groupName: '', maxMembers: 4 });
+  const [groupForm, setGroupForm] = useState({ groupName: '', maxMembers: 4, year: 'SE', currentYear: '' });
   
   const { 
     currentGroup, 
@@ -41,7 +41,7 @@ export default function GroupDetails() {
     const result = await createGroup(groupForm);
     if (result.success) {
       setShowCreateForm(false);
-      setGroupForm({ groupName: '', maxMembers: 4 });
+      setGroupForm({ groupName: '', maxMembers: 4, year: 'SE', currentYear: '' });
     }
   };
 
@@ -130,6 +130,31 @@ export default function GroupDetails() {
                     required
                   />
                 </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Year</label>
+                  <select
+                    value={groupForm.year}
+                    onChange={(e) => setGroupForm({...groupForm, year: e.target.value})}
+                    className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    required
+                  >
+                    <option value="SE">SE</option>
+                    <option value="TE">TE</option>
+                    <option value="BE">BE</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Current Year (e.g., 2025-2026)</label>
+                  <input
+                    type="text"
+                    value={groupForm.currentYear}
+                    onChange={(e) => setGroupForm({...groupForm, currentYear: e.target.value})}
+                    placeholder="2025-2026"
+                    pattern="^\d{4}-\d{4}$"
+                    className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    required
+                  />
+                </div>
                 <div className="flex gap-3">
                   <button type="submit" className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">
                     Create Group
@@ -147,9 +172,14 @@ export default function GroupDetails() {
           ) : (
             <div className="p-6 space-y-6">
               <div className="flex justify-between items-center">
-                <h2 className="text-xl font-semibold">
-                  {currentGroup?.groupName} ({acceptedMembers.length}/{currentGroup?.maxMembers})
-                </h2>
+                <div>
+                  <h2 className="text-xl font-semibold">
+                    {currentGroup?.groupName} ({acceptedMembers.length}/{currentGroup?.maxMembers})
+                  </h2>
+                  <div className="text-sm text-gray-600 mt-1">
+                    {currentGroup?.year} • {currentGroup?.currentYear}
+                  </div>
+                </div>
                 {isAdmin && (
                   <button 
                     onClick={() => setShowInviteModal(true)}

@@ -1,42 +1,38 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import useMentorStore from '../../store/mentorStore';
 
-export const ProjectApprovalModal = ({
+export const ReportViewModal = ({
   isOpen,
   onClose,
-  teamName = "Team Alpha",
-  topic
+  teamName,
+  report
 }) => {
-  const { respondToTopic, fetchTopicsByGroup } = useMentorStore();
+  const { respondToReport, markReportViewed } = useMentorStore();
   const [feedback, setFeedback] = useState("");
-  const [needsAttention, setNeedsAttention] = useState(false);
+  const [status, setStatus] = useState('viewed');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
-    if (topic) {
-      setFeedback(topic.mentorFeedback || "");
-      setNeedsAttention(topic.status === 'rejected');
+    if (report) {
+      setFeedback(report.mentorFeedback || "");
+      setStatus(report.status || 'viewed');
+      
+      if (report.status === 'sent') {
+        markReportViewed(report._id);
+      }
     }
-  }, [topic]);
+  }, [report, markReportViewed]);
 
-  const handleApprove = async () => {
-    if (!topic) return;
+  const handleSubmit = async () => {
+    if (!report) return;
     setIsSubmitting(true);
     try {
-      const status = needsAttention ? 'rejected' : 'accepted';
-      await respondToTopic(topic._id, status, feedback);
-      await fetchTopicsByGroup(topic.groupId);
+      await respondToReport(report._id, status, feedback);
       onClose();
     } catch (error) {
-      console.error('Failed to approve topic:', error);
+      console.error('Failed to submit feedback:', error);
     } finally {
       setIsSubmitting(false);
-    }
-  };
-
-  const handleViewDocument = () => {
-    if (topic?.abstract) {
-      window.open(`http://localhost:3000/uploads/abstracts/${topic.abstract}`, '_blank');
     }
   };
 
@@ -55,7 +51,7 @@ export const ProjectApprovalModal = ({
     };
   }, [isOpen, handleKeyDown]);
 
-  if (!isOpen || !topic) return null;
+  if (!isOpen || !report) return null;
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6 md:p-10">
@@ -74,10 +70,10 @@ export const ProjectApprovalModal = ({
         </button>
 
         <div className="w-full md:w-[42%] bg-[#F1F3F6] p-6 md:p-10 flex flex-col border-r border-gray-100">
-          {topic?.abstract ? (
-            topic.abstract.endsWith('.pdf') ? (
+          {report?.reportFile ? (
+            report.reportFile.endsWith('.pdf') ? (
               <iframe
-                src={`http://localhost:3000/uploads/abstracts/${topic.abstract}`}
+                src={`http://localhost:3000/uploads/reports/${report.reportFile}`}
                 className="w-full flex-1 rounded-2xl shadow-xl"
                 title="PDF Preview"
               />
@@ -93,7 +89,7 @@ export const ProjectApprovalModal = ({
                 <p className="text-gray-600 font-medium mb-2">DOCX Document</p>
                 <p className="text-sm text-gray-500 mb-6 text-center">Click below to download and view</p>
                 <a
-                  href={`http://localhost:3000/uploads/abstracts/${topic.abstract}`}
+                  href={`http://localhost:3000/uploads/reports/${report.reportFile}`}
                   download
                   className="px-6 py-3 bg-blue-600 text-white rounded-xl font-medium hover:bg-blue-700 transition-colors"
                 >
@@ -112,17 +108,49 @@ export const ProjectApprovalModal = ({
           <div className="flex-grow">
             <header className="mb-10">
               <span className="inline-block px-3 py-1 bg-blue-50 text-blue-600 text-[10px] font-bold uppercase tracking-widest rounded-full mb-4">
-                Reviewing Submission
+                Reviewing Report
               </span>
               <h1 className="text-4xl font-black text-gray-900 mb-4 tracking-tight">
-                {topic.projectTitle}
+                {report.reportTitle}
               </h1>
               <p className="text-gray-500 text-base leading-relaxed max-w-lg">
-                {topic.description}
+                Submitted by {teamName}
               </p>
             </header>
 
             <div className="space-y-8">
+              <div>
+                <label className="block text-sm font-bold text-gray-900 mb-4 uppercase tracking-wider">
+                  Status
+                </label>
+                <div className="flex gap-3">
+                  <button
+                    onClick={() => setStatus('viewed')}
+                    className={`px-4 py-2 rounded-lg font-medium transition-all ${
+                      status === 'viewed' ? 'bg-gray-600 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                    }`}
+                  >
+                    Viewed
+                  </button>
+                  <button
+                    onClick={() => setStatus('accepted')}
+                    className={`px-4 py-2 rounded-lg font-medium transition-all ${
+                      status === 'accepted' ? 'bg-green-600 text-white' : 'bg-green-100 text-green-600 hover:bg-green-200'
+                    }`}
+                  >
+                    Accepted
+                  </button>
+                  <button
+                    onClick={() => setStatus('rejected')}
+                    className={`px-4 py-2 rounded-lg font-medium transition-all ${
+                      status === 'rejected' ? 'bg-red-600 text-white' : 'bg-red-100 text-red-600 hover:bg-red-200'
+                    }`}
+                  >
+                    Rejected
+                  </button>
+                </div>
+              </div>
+
               <div>
                 <label className="block text-sm font-bold text-gray-900 mb-4 uppercase tracking-wider">
                   Feedback for Team
@@ -132,44 +160,23 @@ export const ProjectApprovalModal = ({
                     value={feedback}
                     onChange={(e) => setFeedback(e.target.value.slice(0, 500))}
                     className="w-full min-h-[200px] p-6 bg-gray-50 border border-gray-100 rounded-[2rem] focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 focus:bg-white text-gray-800 placeholder-gray-400 transition-all outline-none resize-none text-base" 
-                    placeholder="Provide specific feedback or requested changes..."
+                    placeholder="Provide specific feedback..."
                   />
                   <div className="absolute bottom-5 right-6 text-[10px] font-bold text-gray-400 bg-white px-2 py-1 rounded-md">
                     {feedback.length} / 500
                   </div>
                 </div>
               </div>
-
-              <div className="flex items-center justify-between p-5 border border-gray-100 rounded-3xl bg-gray-50/50">
-                <div className="flex items-center gap-3">
-                  <div className={`p-2 rounded-xl ${needsAttention ? 'bg-amber-100 text-amber-600' : 'bg-gray-100 text-gray-400'}`}>
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
-                  </div>
-                  <div>
-                    <p className="font-bold text-gray-900 text-sm">Flag for Revision</p>
-                    <p className="text-xs text-gray-500">Student must address feedback before approval</p>
-                  </div>
-                </div>
-                <label className="relative inline-flex items-center cursor-pointer">
-                  <input 
-                    type="checkbox" 
-                    checked={needsAttention}
-                    onChange={() => setNeedsAttention(!needsAttention)}
-                    className="sr-only peer" 
-                  />
-                  <div className="w-14 h-7 bg-gray-200 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[4px] after:start-[4px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-[20px] after:w-[20px] after:transition-all peer-checked:bg-blue-600"></div>
-                </label>
-              </div>
             </div>
           </div>
 
           <div className="mt-12 flex gap-4">
             <button 
-              onClick={handleApprove}
+              onClick={handleSubmit}
               disabled={isSubmitting}
               className="flex-grow bg-blue-600 hover:bg-blue-700 text-white font-bold py-5 px-8 rounded-3xl transition-all active:scale-[0.98] shadow-xl shadow-blue-500/20 text-lg disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {isSubmitting ? 'Submitting...' : needsAttention ? 'Request Revision' : 'Approve Project Topic'}
+              {isSubmitting ? 'Submitting...' : 'Submit Feedback'}
             </button>
           </div>
         </div>
@@ -178,4 +185,4 @@ export const ProjectApprovalModal = ({
   );
 };
 
-export default ProjectApprovalModal;
+export default ReportViewModal;
