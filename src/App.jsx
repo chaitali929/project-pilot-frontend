@@ -30,6 +30,7 @@ import CoMentor from "./components/Coordinator/Co_Mentor";
 import CoMentorPage from "./pages/CoMentorPage";
 import TeamPage from "./pages/TeamPage";
 import StudentsPage from "./pages/StudentsPage";
+import ProjectDiary from "./components/Sidebar/ProjectDiary";
 
 function App() {
   return (
@@ -61,6 +62,7 @@ function App() {
           <Route path="/StudentDashboard/Topics" element={<Topics />} />
           <Route path="/StudentDashboard/Reports" element={<Reports />} />
           <Route path="/StudentDashboard/Workspace" element={<Workspace />} />
+          <Route path="/StudentDashboard/ProjectDiary" element={<ProjectDiary />} />
           <Route path="/StudentDashboard/Workspace/view/:workspaceId" element={<WorkspaceView />} />
           <Route path="/StudentDashboard/Notifications" element={<Notifications />} />
           <Route path="/StudentDashboard/Workspace/NewProject" element={<NewProject />} />

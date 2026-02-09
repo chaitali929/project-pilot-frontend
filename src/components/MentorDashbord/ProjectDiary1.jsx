@@ -1,48 +1,27 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import useMentorStore from '../../store/mentorStore';
 
-const TASKS = [
-    { id: 1, name: 'API Integration', avatar: 'https://i.pravatar.cc/150?u=1' },
-    { id: 2, name: 'WebSocket Setup', avatar: 'https://i.pravatar.cc/150?u=2' },
-    { id: 3, name: 'Performance Testing', avatar: 'https://i.pravatar.cc/150?u=3' },
-    { id: 4, name: 'Documentation', avatar: 'https://i.pravatar.cc/150?u=4' }
-];
-
-const POW_FILES = [
-    { id: 1, name: 'api_docs.pdf', type: 'document' },
-    { id: 2, name: 'screenshot.png', type: 'image' },
-    { id: 3, name: 'test_results.pdf', type: 'document' },
-    { id: 4, name: 'demo.mp4', type: 'video' }
-];
-
-const TEAM_AVATARS = [
-    'https://i.pravatar.cc/150?u=team1',
-    'https://i.pravatar.cc/150?u=team2',
-    'https://i.pravatar.cc/150?u=team3',
-    'https://i.pravatar.cc/150?u=team4'
-];
-
-const TaskItem = ({ task }) => (
-    <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl border border-gray-200">
-        <img alt={task.name} className="w-8 h-8 rounded-full" src={task.avatar} />
-        <span className="text-sm text-gray-700 font-medium">{task.name}</span>
-    </div>
-);
-
-const FileItem = ({ file }) => (
-    <div className="flex items-center gap-2 p-2.5 px-3 bg-gray-50 rounded-lg border border-gray-100 hover:border-blue-300 transition-colors cursor-pointer group">
-        <div className={`w-4 h-4 ${file.type === 'image' ? 'bg-blue-500' : 'bg-gray-400'} rounded`}></div>
-        <span className="text-xs text-gray-600 truncate group-hover:text-blue-600 transition-colors">{file.name}</span>
-    </div>
-);
-
-const ProjectDiary1Modal = ({ isOpen, onClose, teamName = "Group No.4" }) => {
+const ProjectDiary1Modal = ({ isOpen, onClose, diary }) => {
     const [feedback, setFeedback] = useState('');
+    const [grade, setGrade] = useState('');
+    const { submitDiaryFeedback, isLoading } = useMentorStore();
 
-    if (!isOpen) return null;
+    useEffect(() => {
+        if (diary) {
+            setFeedback(diary.mentorFeedback || '');
+            setGrade(diary.grade || '');
+        }
+    }, [diary]);
 
-    const handleSubmit = () => {
-        console.log("Feedback submitted:", feedback);
-        onClose();
+    if (!isOpen || !diary) return null;
+
+    const handleSubmit = async () => {
+        try {
+            await submitDiaryFeedback(diary._id, feedback, grade);
+            onClose();
+        } catch (error) {
+            console.error('Failed to submit feedback:', error);
+        }
     };
 
     return (
@@ -61,59 +40,79 @@ const ProjectDiary1Modal = ({ isOpen, onClose, teamName = "Group No.4" }) => {
 
                 <div className="w-full md:w-1/2 p-8 md:p-10 border-r border-gray-100 bg-white overflow-y-auto">
                     <div className="flex items-center gap-4 mb-8">
-                        <h1 className="text-2xl font-bold text-gray-900">{teamName}</h1>
+                        <h1 className="text-2xl font-bold text-gray-900">{diary.groupId?.groupName || 'Unknown Team'}</h1>
                         <div className="flex -space-x-2">
-                            {TEAM_AVATARS.map((src, i) => (
-                                <img 
-                                    key={i} 
-                                    alt="Team member" 
-                                    className="w-8 h-8 rounded-full border-2 border-white bg-gray-100 shadow-sm" 
-                                    src={src} 
-                                />
-                            ))}
+                            {diary.groupId?.members?.slice(0, 4).map((member, i) => {
+                                const initial = member.userId?.email?.charAt(0).toUpperCase() || '?';
+                                return (
+                                    <div 
+                                        key={i}
+                                        className="w-8 h-8 rounded-full border-2 border-white bg-blue-600 flex items-center justify-center text-white text-sm font-semibold shadow-sm"
+                                        title={member.userId?.email}
+                                    >
+                                        {initial}
+                                    </div>
+                                );
+                            })}
                         </div>
+                        <span className="text-xs bg-blue-100 text-blue-600 px-2 py-1 rounded-full font-semibold">Week {diary.week}</span>
+                    </div>
+
+                    <div className="mb-6">
+                        <h2 className="text-xs uppercase tracking-widest font-bold text-gray-400 mb-2">Date Range</h2>
+                        <p className="text-sm text-gray-600">
+                            {new Date(diary.dateRange.startDate).toLocaleDateString()} - {new Date(diary.dateRange.endDate).toLocaleDateString()}
+                        </p>
                     </div>
 
                     <div className="mb-10">
                         <h2 className="text-xs uppercase tracking-widest font-bold text-gray-400 mb-3">Summary</h2>
                         <p className="text-gray-600 leading-relaxed text-sm">
-                            Completed the backend API integration for real-time location tracking. Implemented WebSocket connection for live updates and tested with multiple concurrent users. Performance benchmarks show 95% accuracy in indoor positioning.
+                            {diary.summary}
                         </p>
                     </div>
 
                     <div>
-                        <h2 className="text-xs uppercase tracking-widest font-bold text-gray-400 mb-4">Tasks Done</h2>
+                        <h2 className="text-xs uppercase tracking-widest font-bold text-gray-400 mb-4">Tasks ({diary.tasks?.filter(t => t.completed).length}/{diary.tasks?.length} completed)</h2>
                         <div className="space-y-3">
-                            {TASKS.map(task => <TaskItem key={task.id} task={task} />)}
+                            {diary.tasks?.map((task, idx) => (
+                                <div key={idx} className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl border border-gray-200">
+                                    <input type="checkbox" checked={task.completed} readOnly className="w-4 h-4" />
+                                    <span className={`text-sm font-medium ${task.completed ? 'text-gray-400 line-through' : 'text-gray-700'}`}>{task.description}</span>
+                                </div>
+                            ))}
                         </div>
                     </div>
                 </div>
 
                 <div className="w-full md:w-1/2 p-8 md:p-10 flex flex-col bg-white overflow-y-auto">
                     <div className="mb-8">
-                        <h2 className="text-xs uppercase tracking-widest font-bold text-gray-400 mb-4">Proof of Work</h2>
+                        <h2 className="text-xs uppercase tracking-widest font-bold text-gray-400 mb-4">Proof of Work ({diary.proofOfWork?.length || 0} files)</h2>
                         <div className="grid grid-cols-2 gap-3">
-                            {POW_FILES.map(file => <FileItem key={file.id} file={file} />)}
+                            {diary.proofOfWork?.map((file, idx) => (
+                                <a 
+                                    key={idx}
+                                    href={`http://localhost:3000/uploads/proofOfWork/${file}`}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="flex items-center gap-2 p-2.5 px-3 bg-gray-50 rounded-lg border border-gray-100 hover:border-blue-300 transition-colors cursor-pointer group"
+                                >
+                                    <div className="w-4 h-4 bg-blue-500 rounded"></div>
+                                    <span className="text-xs text-gray-600 truncate group-hover:text-blue-600 transition-colors">File {idx + 1}</span>
+                                </a>
+                            ))}
                         </div>
                     </div>
 
                     <div className="mb-8">
-                        <h2 className="text-xs uppercase tracking-widest font-bold text-gray-400 mb-4">Grades</h2>
-                        <div className="flex items-center justify-between p-3 bg-white border border-gray-200 rounded-xl cursor-pointer hover:bg-gray-50 transition-colors shadow-sm group">
-                            <div className="flex -space-x-1.5">
-                                {TEAM_AVATARS.map((src, i) => (
-                                    <img 
-                                        key={i} 
-                                        alt="Team member" 
-                                        className="w-8 h-8 rounded-full border-2 border-white bg-gray-100 shadow-sm" 
-                                        src={src} 
-                                    />
-                                ))}
-                            </div>
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-gray-400 group-hover:text-blue-600 transition-colors">
-                                <polyline points="6,9 12,15 18,9"></polyline>
-                            </svg>
-                        </div>
+                        <h2 className="text-xs uppercase tracking-widest font-bold text-gray-400 mb-4">Grade</h2>
+                        <input
+                            type="text"
+                            placeholder="Enter grade (e.g., +8, A, 85%)"
+                            value={grade}
+                            onChange={(e) => setGrade(e.target.value)}
+                            className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none text-gray-700 placeholder-gray-400 text-sm"
+                        />
                     </div>
 
                     <div className="flex-grow">
@@ -129,9 +128,10 @@ const ProjectDiary1Modal = ({ isOpen, onClose, teamName = "Group No.4" }) => {
                     <div className="mt-8">
                         <button 
                             onClick={handleSubmit}
-                            className="w-full py-4 bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-700 transition-all shadow-lg active:scale-[0.98]"
+                            disabled={isLoading}
+                            className="w-full py-4 bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-700 transition-all shadow-lg active:scale-[0.98] disabled:opacity-50"
                         >
-                            Grade & Submit
+                            {isLoading ? 'Submitting...' : 'Submit Feedback'}
                         </button>
                     </div>
                 </div>

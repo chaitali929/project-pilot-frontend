@@ -16,7 +16,7 @@ export default function Sidebar({ isMobile = false, onClose }) {
 
   return (
     <aside
-      className={`w-64 bg-white flex flex-col ${
+      className={`w-64 bg-white flex flex-col border-r border-black ${
         isMobile ? "h-full" : "hidden md:flex"
       }`}
     >
@@ -81,7 +81,10 @@ export default function Sidebar({ isMobile = false, onClose }) {
           Workspace
         </NavLink>
 
-
+   <NavLink to="/StudentDashboard/ProjectDiary" className={linkClasses}>
+          <FiPackage className="w-5 h-5" />
+          Project Dairy
+        </NavLink>
 
               
        <NavLink to="/StudentDashboard/Notifications" className={linkClasses}>

@@ -5,6 +5,8 @@ const useMentorStore = create((set, get) => ({
     groups: [],
     topics: [],
     reports: [],
+    diaries: [],
+    selectedDiary: null,
     isLoading: false,
     error: null,
 
@@ -78,6 +80,45 @@ const useMentorStore = create((set, get) => ({
             await mentorAPI.markReportViewed(reportId);
         } catch (error) {
             console.error('Failed to mark report as viewed:', error);
+        }
+    },
+
+    fetchDiaries: async () => {
+        set({ isLoading: true, error: null });
+        try {
+            const response = await mentorAPI.getDiaries();
+            set({ diaries: response.data.diaries, isLoading: false });
+        } catch (error) {
+            set({ 
+                error: error.response?.data?.error || 'Failed to fetch diaries',
+                isLoading: false 
+            });
+        }
+    },
+
+    fetchDiary: async (diaryId) => {
+        set({ isLoading: true, error: null });
+        try {
+            const response = await mentorAPI.getDiary(diaryId);
+            set({ selectedDiary: response.data.diary, isLoading: false });
+        } catch (error) {
+            set({ 
+                error: error.response?.data?.error || 'Failed to fetch diary',
+                isLoading: false 
+            });
+        }
+    },
+
+    submitDiaryFeedback: async (diaryId, mentorFeedback, grade) => {
+        set({ isLoading: true, error: null });
+        try {
+            await mentorAPI.submitDiaryFeedback(diaryId, mentorFeedback, grade);
+            set({ isLoading: false });
+        } catch (error) {
+            set({ 
+                error: error.response?.data?.error || 'Failed to submit feedback',
+                isLoading: false 
+            });
         }
     },
 

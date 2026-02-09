@@ -14,7 +14,7 @@ export default function MentorSidebar({ isMobile = false, onClose }) {
 
   return (
     <aside
-      className={`w-64 bg-white flex flex-col ${
+      className={`w-64 bg-white flex flex-col border-r border-black ${
         isMobile ? "h-full" : "hidden md:flex"
       }`}
     >

@@ -95,6 +95,9 @@ export const mentorAPI = {
   getReportsByGroup: (groupId) => api.get(`/api/mentor/reports/group/${groupId}`),
   respondToReport: (reportId, status, mentorFeedback) => api.post(`/api/reports/respond/${reportId}`, {status, mentorFeedback}),
   markReportViewed: (reportId) => api.post(`/api/mentor/reports/mark-viewed/${reportId}`),
+  getDiaries: () => api.get('/api/mentor/diaries'),
+  getDiary: (diaryId) => api.get(`/api/mentor/diaries/${diaryId}`),
+  submitDiaryFeedback: (diaryId, mentorFeedback, grade) => api.post(`/api/mentor/diaries/feedback/${diaryId}`, {mentorFeedback, grade}),
 };
 
 export const TopicAPI = {

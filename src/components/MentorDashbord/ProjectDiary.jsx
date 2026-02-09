@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Search, 
   Download, 
@@ -17,13 +17,7 @@ import {
 import MentorSideBar from "../MentorSideBar";
 import Topbar from "../Topbar";
 import ProjectDiary1Modal from './ProjectDiary1';
-
-const MOCK_DATA = [
-  { id: 1, team: 'Group No.1', week: 'Week-5', dates: 'Oct-14-20', summary: 'Completed the backend API integration for real-time location tracking. Implemented WebSocket connection for live updates and tested with', pow: 'pow.pdf', type: 'pdf', status: 'Reviewed', grade: '+8' },
-  { id: 3, team: 'Group No.3', week: 'Week-5', dates: 'Oct-14-20', summary: 'Completed the backend API integration for real-time location tracking. Implemented WebSocket connection for live updates and tested with', pow: 'Pow.jpeg', type: 'image', status: 'Attention', grade: '+10' },
-  { id: 4, team: 'Group No.4', week: 'Week-5', dates: 'Oct-14-20', summary: 'Completed the backend API integration for real-time location tracking. Implemented WebSocket connection for live updates and tested with', pow: 'pow.pdf', type: 'pdf', status: 'Overdue', grade: '+7' },
-  { id: 7, team: 'Group No.7', week: 'Week-5', dates: 'Oct-14-20', summary: 'Completed the backend API integration for real-time location tracking. Implemented WebSocket connection for live updates and tested with', pow: 'pow.pdf', type: 'pdf', status: 'Reviewed', grade: '+9' },
-];
+import useMentorStore from '../../store/mentorStore';
 
 const StatCard = ({ icon: Icon, value, label, color }) => (
   <div className="bg-white rounded-2xl p-6 flex flex-col items-center justify-center shadow-sm border border-slate-50 min-w-[180px] flex-1">
@@ -58,16 +52,30 @@ const StatusBadge = ({ status }) => {
 
 export default function MentorProjectDiary() {
   const [showDiaryModal, setShowDiaryModal] = useState(false);
-  const [selectedTeam, setSelectedTeam] = useState(null);
+  const [selectedDiary, setSelectedDiary] = useState(null);
+  const [searchQuery, setSearchQuery] = useState('');
 
-  const handleActionClick = (item) => {
-    setSelectedTeam(item.team);
+  const { diaries, fetchDiaries, isLoading } = useMentorStore();
+
+  useEffect(() => {
+    fetchDiaries();
+  }, [fetchDiaries]);
+
+  const filteredDiaries = diaries.filter(diary => 
+    diary.groupId?.groupName?.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  const pendingCount = diaries.filter(d => d.status === 'pending').length;
+
+  const handleActionClick = (diary) => {
+    setSelectedDiary(diary);
     setShowDiaryModal(true);
   };
 
   const handleCloseDiaryModal = () => {
     setShowDiaryModal(false);
-    setSelectedTeam(null);
+    setSelectedDiary(null);
+    fetchDiaries();
   };
   return (
     <div className="min-h-screen flex bg-gray-50">
@@ -85,11 +93,9 @@ export default function MentorProjectDiary() {
         
         {/* Stat Cards Row */}
         <div className="flex flex-wrap gap-6 mb-8">
-          <StatCard icon={Users} value="12" label="Active Teams" color={{ bg: 'bg-emerald-50', text: 'text-emerald-500' }} />
-          <StatCard icon={Clock} value="5" label="Pending Reviews" color={{ bg: 'bg-amber-50', text: 'text-amber-500' }} />
-          <StatCard icon={AlertCircle} value="2" label="Overdue Logs" color={{ bg: 'bg-rose-50', text: 'text-rose-500' }} />
-          <StatCard icon={TrendingUp} value="68%" label="Average Progress" color={{ bg: 'bg-indigo-50', text: 'text-indigo-500' }} />
-          <StatCard icon={Calendar} value="Oct 27, 2024" label="Next Deadline" color={{ bg: 'bg-purple-50', text: 'text-purple-500' }} />
+          <StatCard icon={Users} value={diaries.length} label="Total Entries" color={{ bg: 'bg-emerald-50', text: 'text-emerald-500' }} />
+          <StatCard icon={Clock} value={pendingCount} label="Pending Reviews" color={{ bg: 'bg-amber-50', text: 'text-amber-500' }} />
+          <StatCard icon={CheckCircle2} value={diaries.length - pendingCount} label="Reviewed" color={{ bg: 'bg-blue-50', text: 'text-blue-500' }} />
         </div>
 
         {/* Filter Bar */}
@@ -99,18 +105,20 @@ export default function MentorProjectDiary() {
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
               <input 
                 type="text" 
-                placeholder="Search teams..." 
+                placeholder="Search teams..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
                 className="w-full pl-12 pr-4 py-3 bg-white border border-slate-200 rounded-xl text-slate-600 placeholder:text-slate-400 focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none"
               />
             </div>
 
             <div className="flex items-center gap-3">
-              <button className="px-4 py-2 bg-indigo-600 text-white rounded-lg font-medium text-sm">Active</button>
+              <button className="px-4 py-2 bg-indigo-600 text-white rounded-lg font-medium text-sm">All</button>
               <button className="px-4 py-2 bg-slate-100 text-slate-600 rounded-lg font-medium text-sm hover:bg-slate-200 transition-colors">
-                Inactive
+                Pending
               </button>
               <button className="px-4 py-2 bg-slate-100 text-slate-600 rounded-lg font-medium text-sm hover:bg-slate-200 transition-colors">
-                Completed
+                Reviewed
               </button>
             </div>
           </div>
@@ -136,56 +144,76 @@ export default function MentorProjectDiary() {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
-              {MOCK_DATA.map((item) => (
-                <tr key={item.id} className="hover:bg-slate-50 transition-colors">
+              {isLoading ? (
+                <tr>
+                  <td colSpan={7} className="px-6 py-12 text-center text-slate-500">
+                    Loading diaries...
+                  </td>
+                </tr>
+              ) : filteredDiaries.length === 0 ? (
+                <tr>
+                  <td colSpan={7} className="px-6 py-12 text-center text-slate-500">
+                    No diary entries found
+                  </td>
+                </tr>
+              ) : (
+                filteredDiaries.map((diary) => (
+                <tr key={diary._id} className="hover:bg-slate-50 transition-colors">
                   <td className="px-6 py-4">
                     <div className="flex flex-col items-center gap-2">
-                      <span className="font-semibold text-sm text-slate-800">{item.team}</span>
+                      <span className="font-semibold text-sm text-slate-800">{diary.groupId?.groupName || 'Unknown'}</span>
                       <div className="flex -space-x-1">
-                        {[1, 2, 3, 4].map(i => (
-                          <img 
-                            key={i}
-                            src={`https://i.pravatar.cc/100?u=${item.id}${i}`} 
-                            className="w-6 h-6 rounded-full border-2 border-white"
-                            alt="member"
-                          />
-                        ))}
+                        {diary.groupId?.members?.slice(0, 4).map((member, i) => {
+                          const initial = member.userId?.email?.charAt(0).toUpperCase() || '?';
+                          return (
+                            <div 
+                              key={i}
+                              className="w-6 h-6 rounded-full border-2 border-white bg-blue-500 flex items-center justify-center text-white text-xs font-semibold"
+                              title={member.userId?.email}
+                            >
+                              {initial}
+                            </div>
+                          );
+                        })}
                       </div>
                     </div>
                   </td>
                   <td className="px-6 py-4 text-center">
-                    <div className="font-semibold text-sm text-slate-800">{item.week}</div>
-                    <div className="text-xs text-slate-500">{item.dates}</div>
+                    <div className="font-semibold text-sm text-slate-800">Week {diary.week}</div>
+                    <div className="text-xs text-slate-500">
+                      {new Date(diary.dateRange.startDate).toLocaleDateString()} - {new Date(diary.dateRange.endDate).toLocaleDateString()}
+                    </div>
                   </td>
                   <td className="px-6 py-4">
-                    <p className="text-sm text-slate-600 leading-relaxed max-w-xs">
-                      {item.summary}
+                    <p className="text-sm text-slate-600 leading-relaxed max-w-xs line-clamp-2">
+                      {diary.summary}
                     </p>
                   </td>
                   <td className="px-6 py-4 text-center">
                     <div className="flex flex-col items-center gap-1">
                       <div className="p-2 bg-blue-50 rounded-lg">
-                        {item.type === 'pdf' ? <FileText size={18} className="text-blue-500" /> : <ImageIcon size={18} className="text-blue-500" />}
+                        <FileText size={18} className="text-blue-500" />
                       </div>
-                      <span className="text-xs text-slate-500">{item.pow}</span>
+                      <span className="text-xs text-slate-500">{diary.proofOfWork?.length || 0} files</span>
                     </div>
                   </td>
                   <td className="px-6 py-4 text-center">
-                    <StatusBadge status={item.status} />
+                    <StatusBadge status={diary.status === 'reviewed' ? 'Reviewed' : 'Attention'} />
                   </td>
                   <td className="px-6 py-4 text-center">
-                    <span className="font-bold text-lg text-slate-700">{item.grade}</span>
+                    <span className="font-bold text-lg text-slate-700">{diary.grade || '-'}</span>
                   </td>
                   <td className="px-6 py-4 text-center">
                     <button 
-                      onClick={() => handleActionClick(item)}
+                      onClick={() => handleActionClick(diary)}
                       className="p-2 border border-slate-200 rounded-lg text-slate-500 hover:text-slate-700 hover:bg-slate-50 transition-all"
                     >
                       <Edit3 size={16} />
                     </button>
                   </td>
                 </tr>
-              ))}
+              )))
+              }
             </tbody>
           </table>
         </div>
@@ -197,7 +225,7 @@ export default function MentorProjectDiary() {
       <ProjectDiary1Modal 
         isOpen={showDiaryModal}
         onClose={handleCloseDiaryModal}
-        teamName={selectedTeam || "Group No.4"}
+        diary={selectedDiary}
       />
     </div>
   );
