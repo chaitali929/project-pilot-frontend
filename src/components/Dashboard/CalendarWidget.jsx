@@ -109,8 +109,8 @@ export default function CalendarWidget() {
 
       {/* Week labels */}
       <div className="grid grid-cols-7 gap-1 text-xs text-gray-500 mb-2">
-        {WEEK_DAYS.map((d) => (
-          <div key={d} className="text-center font-medium">{d}</div>
+        {WEEK_DAYS.map((d, i) => (
+          <div key={i} className="text-center font-medium">{d}</div>
         ))}
       </div>
 
