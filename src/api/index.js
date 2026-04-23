@@ -83,6 +83,9 @@ export const coordinatorAPI = {
   postReport: (reportData) => api.post('/api/reports/submit-report', reportData, {
     headers: { 'Content-Type': 'multipart/form-data' }
   }),
+  addReportVersion: (reportId, formData) => api.post(`/api/reports/add-version/${reportId}`, formData, {
+    headers: { 'Content-Type': 'multipart/form-data' }
+  }),
   getReports: (groupId) => api.get(`/api/reports/${groupId}`),
   respondToReport: (reportId, status, mentorFeedback) => api.post(`/api/reports/respond/${reportId}`, {status, mentorFeedback}),
   // Admin routes
@@ -120,7 +123,20 @@ export const TopicAPI = {
 };
 
 export const chatAPI = {
-  sendMessage: (message, history) => api.post('/api/chat/chat', { message, history }),
+  sendMessage: (message, history, workspaceContext, documentContext) =>
+    api.post('/api/chat/chat', { message, history, workspaceContext, documentContext }),
+  getWorkspaces: () => api.get('/api/chat/workspaces'),
+  getWorkspaceContext: (workspaceId) => api.get(`/api/chat/workspace-context/${workspaceId}`),
+  uploadDoc: (file) => {
+    const form = new FormData();
+    form.append('file', file);
+    return api.post('/api/chat/upload-doc', form, { headers: { 'Content-Type': 'multipart/form-data' } });
+  },
+};
+
+export const notificationAPI = {
+  getStudentNotifications: () => api.get('/api/notifications/student'),
+  getMentorNotifications: () => api.get('/api/notifications/mentor'),
 };
 
 export default api;

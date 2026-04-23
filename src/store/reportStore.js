@@ -26,6 +26,19 @@ const useReportStore = create(
         }
       },
 
+      addVersion: async (reportId, formData) => {
+        set({ isLoading: true, error: null });
+        try {
+          await coordinatorAPI.addReportVersion(reportId, formData);
+          set({ isLoading: false });
+        } catch (error) {
+          set({
+            error: error.response?.data?.error || 'Failed to add version',
+            isLoading: false
+          });
+        }
+      },
+
       fetchReports: async (groupId) => {
         set({ isLoading: true, error: null });
         try {

@@ -62,6 +62,7 @@ const ReviewTable = ({ reports, onFeedback, isLoading }) => {
             <tr className="bg-slate-50/50">
               <th className="px-6 py-4 text-[12px] font-bold uppercase tracking-wider text-slate-500">Team</th>
               <th className="px-6 py-4 text-[12px] font-bold uppercase tracking-wider text-slate-500">Report Title</th>
+              <th className="px-6 py-4 text-[12px] font-bold uppercase tracking-wider text-slate-500">Versions</th>
               <th className="px-6 py-4 text-[12px] font-bold uppercase tracking-wider text-slate-500">Submitted</th>
               <th className="px-6 py-4 text-[12px] font-bold uppercase tracking-wider text-slate-500">Status</th>
               <th className="px-6 py-4 text-[12px] font-bold uppercase tracking-wider text-slate-500 text-right">Actions</th>
@@ -75,6 +76,11 @@ const ReviewTable = ({ reports, onFeedback, isLoading }) => {
                 </td>
                 <td className="px-6 py-4">
                   <div className="text-sm text-slate-900 font-medium">{report.reportTitle}</div>
+                </td>
+                <td className="px-6 py-4">
+                  <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-indigo-50 text-indigo-600 text-xs font-bold rounded-full border border-indigo-100">
+                    v{report.versions?.length || 1}
+                  </span>
                 </td>
                 <td className="px-6 py-4">
                   <div className="text-sm text-slate-600 font-medium">{formatDate(report.createdAt)}</div>
@@ -96,7 +102,7 @@ const ReviewTable = ({ reports, onFeedback, isLoading }) => {
             ))}
             {reports.length === 0 && (
               <tr>
-                <td colSpan={5} className="px-6 py-16 text-center">
+                <td colSpan={6} className="px-6 py-16 text-center">
                   <div className="flex flex-col items-center justify-center text-slate-400">
                     <Search className="w-10 h-10 mb-2 opacity-20" />
                     <p className="text-sm">No reports found.</p>
