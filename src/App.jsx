@@ -31,6 +31,14 @@ import CoMentorPage from "./pages/CoMentorPage";
 import TeamPage from "./pages/TeamPage";
 import StudentsPage from "./pages/StudentsPage";
 import ProjectDiary from "./components/Sidebar/ProjectDiary";
+import ProfilePage from "./pages/ProfilePage";
+import HelpPage from "./pages/HelpPage";
+import ChatPage from "./pages/ChatPage";
+import Sidebar from "./components/Sidebar";
+import Topbar from "./components/Topbar";
+import MentorSidebar from "./components/MentorSideBar";
+import CoordinatorSidebar from "./components/CoordinatorSideBar";
+import AdministrationPage from "./pages/AdministrationPage";
 
 function App() {
   return (
@@ -73,12 +81,23 @@ function App() {
           <Route path="/MentorDashboard/Groups" element={<MentorGroups />} />
           <Route path="/MentorDashboard/ProjectDiary" element={<MentorProjectDiary />} />
           <Route path="/MentorDashboard/Notifications" element={<MentorNotifications />} />
+          <Route path="/MentorDashboard/Profile" element={<ProfilePage Sidebar={MentorSidebar} Topbar={Topbar} />} />
+          <Route path="/MentorDashboard/Help" element={<HelpPage Sidebar={MentorSidebar} Topbar={Topbar} />} />
+          <Route path="/MentorDashboard/Chat" element={<ChatPage Sidebar={MentorSidebar} Topbar={Topbar} />} />
 
           {/* Coordinator Dashboard Routes */}
           <Route path="/CoordinatorDashboard/TeamsManagement" element={<TeamPage />} />
           <Route path="/CoordinatorDashboard/Students" element={<StudentsPage />} />
           <Route path="/CoordinatorDashboard/Mentors" element={<CoMentorPage />} />
-          <Route path="/CoordinatorDashboard/Administration" element={<div>Administration</div>} />
+          <Route path="/CoordinatorDashboard/Administration" element={<AdministrationPage />} />
+          <Route path="/CoordinatorDashboard/Profile" element={<ProfilePage Sidebar={CoordinatorSidebar} Topbar={Topbar} />} />
+          <Route path="/CoordinatorDashboard/Help" element={<HelpPage Sidebar={CoordinatorSidebar} Topbar={Topbar} />} />
+          <Route path="/CoordinatorDashboard/Chat" element={<ChatPage Sidebar={CoordinatorSidebar} Topbar={Topbar} />} />
+
+          {/* Student Settings Routes */}
+          <Route path="/StudentDashboard/Profile" element={<ProfilePage Sidebar={Sidebar} Topbar={Topbar} />} />
+          <Route path="/StudentDashboard/Help" element={<HelpPage Sidebar={Sidebar} Topbar={Topbar} />} />
+          <Route path="/StudentDashboard/Chat" element={<ChatPage Sidebar={Sidebar} Topbar={Topbar} />} />
           {/* 404 Fallback */}
           <Route
             path="*"

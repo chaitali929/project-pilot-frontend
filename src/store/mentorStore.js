@@ -7,8 +7,18 @@ const useMentorStore = create((set, get) => ({
     reports: [],
     diaries: [],
     selectedDiary: null,
+    sidebarStats: null,
     isLoading: false,
     error: null,
+
+    fetchSidebarStats: async () => {
+        try {
+            const res = await mentorAPI.getStats();
+            set({ sidebarStats: res.data });
+        } catch (error) {
+            console.error('Failed to fetch mentor stats');
+        }
+    },
 
     fetchGroups: async () => {
         set({ isLoading: true, error: null });

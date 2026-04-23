@@ -116,13 +116,17 @@ const GroupDashboard = ({ userGroup, isUserAdmin, allMembers, pendingRequests })
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-50">
-              {displayMembers.map((member, idx) => (
-                <tr key={`member-${member._id}-${idx}`} className="hover:bg-gray-50 transition-colors">
+              {displayMembers.map((member, idx) => {
+                const isCurrentUser = member.userId?._id === (user?.id || user?._id);
+                return (
+                <tr key={`member-${member._id}-${idx}`} className={`transition-colors ${isCurrentUser ? 'bg-blue-50 hover:bg-blue-100' : 'hover:bg-gray-50'}`}>
                   <td className="px-6 py-4 flex items-center gap-3">
                     <div className="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center text-white text-sm font-medium">
-                      {member.userId?.email?.charAt(0).toUpperCase()}
+                      {member.userId?.name?.charAt(0).toUpperCase()}
                     </div>
-                    <span className="font-medium">{member.userId?.email}</span>
+                    <span className={`font-medium ${isCurrentUser ? 'text-blue-600' : ''}`}>
+                      {isCurrentUser ? 'You' : member.userId?.name}
+                    </span>
                   </td>
                   <td className="px-6 py-4">
                     <span className={`px-4 py-1 rounded-full text-sm font-medium ${
@@ -160,7 +164,8 @@ const GroupDashboard = ({ userGroup, isUserAdmin, allMembers, pendingRequests })
                     )}
                   </td>
                 </tr>
-              ))}
+                );
+              })}
             </tbody>
           </table>
         </div>
@@ -170,12 +175,12 @@ const GroupDashboard = ({ userGroup, isUserAdmin, allMembers, pendingRequests })
           <div className="space-y-6">
             <h2 className="text-2xl font-bold">Mentor</h2>
             <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex items-center gap-4">
-              {userGroup.mentor?.email ? (
+              {userGroup.mentor?.name ? (
                 <div className="flex items-center gap-4">
                   <div className="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center text-green-600 font-bold text-lg">
-                    {userGroup.mentor.email.charAt(0).toUpperCase()}
+                    {userGroup.mentor.name.charAt(0).toUpperCase()}
                   </div>
-                  <span className="text-xl font-semibold">{userGroup.mentor.email.replace('@gmail.com', '')}</span>
+                  <span className="text-xl font-semibold">{userGroup.mentor.name}</span>
                 </div>
               ) : userGroup.mentor ? (
                 <div className="flex items-center gap-4">
@@ -224,10 +229,10 @@ const GroupDashboard = ({ userGroup, isUserAdmin, allMembers, pendingRequests })
                   <div key={`request-${member._id}-${idx}`} className="p-4 flex items-center justify-between hover:bg-gray-50">
                     <div className="flex items-center gap-3">
                       <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center text-gray-600 text-sm font-medium">
-                        {member.userId?.email?.charAt(0).toUpperCase()}
+                        {member.userId?.name?.charAt(0).toUpperCase()}
                       </div>
                       <div>
-                        <div className="font-bold text-sm">{member.userId?.email}</div>
+                        <div className="font-bold text-sm">{member.userId?.name}</div>
                         <div className="text-xs text-gray-400">
                           Requested {new Date(member.joinedAt).toLocaleDateString()}
                         </div>
@@ -289,7 +294,7 @@ const GroupDashboard = ({ userGroup, isUserAdmin, allMembers, pendingRequests })
                   onClick={handleRemoveMember}
                   className="w-full px-4 py-2 text-left text-red-600 hover:bg-red-50 rounded-md"
                 >
-                  Remove {selectedMember?.userId?.email}
+                  Remove {selectedMember?.userId?.name}
                 </button>
               )}
             </div>

@@ -2,7 +2,7 @@ import React from "react";
 import { NavLink } from "react-router-dom";
 import { MdDashboard, MdNotifications, MdGroup, MdAssignment, MdAdminPanelSettings } from "react-icons/md";
 import { HiOutlineDocumentReport } from "react-icons/hi";
-import { FiUsers, FiUser, FiSliders, FiHelpCircle, FiUserCheck } from "react-icons/fi";
+import { FiUsers, FiUser, FiHelpCircle, FiUserCheck, FiMessageCircle } from "react-icons/fi";
 import { RiTeamLine, RiGroupLine } from "react-icons/ri";
 import { HiAcademicCap } from "react-icons/hi2";
 
@@ -16,7 +16,7 @@ export default function CoordinatorSidebar({ isMobile = false, onClose }) {
 
   return (
     <aside
-      className={`w-64 bg-white flex flex-col ${
+      className={`w-64 bg-white flex flex-col border-r border-black ${
         isMobile ? "h-full" : "hidden md:flex"
       }`}
     >
@@ -75,22 +75,22 @@ export default function CoordinatorSidebar({ isMobile = false, onClose }) {
   </p>
   <ul className="space-y-1">
     <li>
-      <button className="w-full flex items-center gap-3 text-left px-4 py-2 rounded-lg hover:bg-gray-100">
+      <NavLink to="/CoordinatorDashboard/Profile" className={linkClasses}>
         <FiUser className="w-5 h-5 text-gray-600" />
         <span className="text-gray-700">Profile</span>
-      </button>
+      </NavLink>
     </li>
     <li>
-      <button className="w-full flex items-center gap-3 text-left px-4 py-2 rounded-lg hover:bg-gray-100">
-        <FiSliders className="w-5 h-5 text-gray-600" />
-        <span className="text-gray-700">Preferences</span>
-      </button>
-    </li>
-    <li>
-      <button className="w-full flex items-center gap-3 text-left px-4 py-2 rounded-lg hover:bg-gray-100">
+      <NavLink to="/CoordinatorDashboard/Help" className={linkClasses}>
         <FiHelpCircle className="w-5 h-5 text-gray-600" />
         <span className="text-gray-700">Help</span>
-      </button>
+      </NavLink>
+    </li>
+    <li>
+      <NavLink to="/CoordinatorDashboard/Chat" className={linkClasses}>
+        <FiMessageCircle className="w-5 h-5 text-gray-600" />
+        <span className="text-gray-700">Live Chat</span>
+      </NavLink>
     </li>
   </ul>
 </div>

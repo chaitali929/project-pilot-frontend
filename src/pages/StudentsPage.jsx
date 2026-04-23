@@ -1,103 +1,52 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import Topbar from '../components/Topbar';
 import CoordinatorSidebar from '../components/CoordinatorSideBar';
-import { 
-  Search, 
-  SlidersHorizontal, 
-  X, 
-  Edit3 
-} from 'lucide-react';
+import { Search } from 'lucide-react';
+import useCoordinatorStore from '../store/coordinatorStore';
+
+const YEARS = ['SE', 'TE', 'BE'];
 
 const StudentsPage = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-  const [filters, setFilters] = useState(['Unassigned', 'No Mentors', 'BE']);
+  const [yearFilters, setYearFilters] = useState([...YEARS]);
+  const [statusFilter, setStatusFilter] = useState('all'); // all | assigned | unassigned
 
-  const students = [
-    {
-      srNo: 1,
-      name: 'Anuj Dighe',
-      year: 'BE',
-      group: 'Group 4',
-      mentor: { name: 'Prof. Davis', image: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Aneka' },
-      status: 'Assigned'
-    },
-    {
-      srNo: 2,
-      name: 'Mayur Kumawat',
-      year: 'BE',
-      group: 'Group 4',
-      mentor: { name: 'Prof. Davis', image: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Aneka' },
-      status: 'Unassigned'
-    },
-    {
-      srNo: 3,
-      name: 'Chaitali Dahije',
-      year: 'BE',
-      group: 'Group 4',
-      mentor: { name: 'Prof. Davis', image: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Aneka' },
-      status: 'Unassigned'
-    },
-    {
-      srNo: 4,
-      name: 'Om Waghmare',
-      year: 'BE',
-      group: 'Group 4',
-      mentor: { name: 'Prof. Davis', image: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Aneka' },
-      status: 'Unassigned'
-    },
-    {
-      srNo: 5,
-      name: 'Om Waghmare',
-      year: 'BE',
-      group: 'N/A',
-      mentor: null,
-      status: 'Unassigned'
-    },
-    {
-      srNo: 6,
-      name: 'Om Waghmare',
-      year: 'TE',
-      group: 'N/A',
-      mentor: null,
-      status: 'Unassigned'
-    },
-    {
-      srNo: 7,
-      name: 'Om Waghmare',
-      year: 'SE',
-      group: 'N/A',
-      mentor: null,
-      status: 'Unassigned'
-    },
-    {
-      srNo: 8,
-      name: 'Om Waghmare',
-      year: 'TE',
-      group: 'N/A',
-      mentor: null,
-      status: 'Unassigned'
-    }
-  ];
+  const { students, fetchStudents, isLoading } = useCoordinatorStore();
 
-  const removeFilter = (filterToRemove) => {
-    setFilters(filters.filter(f => f !== filterToRemove));
+  useEffect(() => { fetchStudents(); }, []);
+
+  const toggleYear = (year) => {
+    setYearFilters(prev =>
+      prev.includes(year) ? prev.filter(y => y !== year) : [...prev, year]
+    );
   };
+
+  const filtered = useMemo(() => {
+    return students.filter(s => {
+      const q = searchQuery.toLowerCase();
+      const matchSearch =
+        (s.name || '').toLowerCase().includes(q) ||
+        s.email.toLowerCase().includes(q) ||
+        (s.groupName || '').toLowerCase().includes(q);
+      const matchYear = !s.groupYear || yearFilters.includes(s.groupYear);
+      const matchStatus =
+        statusFilter === 'all' ||
+        (statusFilter === 'assigned' && s.isAssigned) ||
+        (statusFilter === 'unassigned' && !s.isAssigned);
+      return matchSearch && matchYear && matchStatus;
+    });
+  }, [students, searchQuery, yearFilters, statusFilter]);
 
   return (
     <div className="min-h-screen flex bg-gray-50">
-      {/* Sidebar for desktop */}
       <div className="hidden md:flex">
         <CoordinatorSidebar />
       </div>
 
-      {/* Mobile sidebar (drawer) */}
       {sidebarOpen && (
         <div className="fixed inset-0 z-40 flex">
-          <div
-            className="fixed inset-0 bg-black bg-opacity-30"
-            onClick={() => setSidebarOpen(false)}
-          ></div>
+          <div className="fixed inset-0 bg-black bg-opacity-30" onClick={() => setSidebarOpen(false)} />
           <div className="relative z-50 w-64 bg-white shadow-xl">
             <CoordinatorSidebar />
           </div>
@@ -107,114 +56,148 @@ const StudentsPage = () => {
       <div className="flex-1 flex flex-col overflow-hidden">
         <Topbar onMenuClick={() => setSidebarOpen(true)} />
 
-        <main className="flex-1 overflow-auto">
-          <div className="p-4 md:p-10 font-sans text-slate-900">
-            <div className="max-w-[1400px] mx-auto space-y-6">
-              
-              {/* Search Bar Section */}
-              <div className="relative group">
-                <div className="absolute inset-y-0 left-6 flex items-center pointer-events-none">
-                  <Search className="text-slate-400" size={20} />
-                </div>
-                <input 
-                  type="text" 
-                  placeholder="Search teams..." 
-                  className="w-full h-14 pl-14 pr-14 bg-white border border-slate-100 rounded-2xl shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/10 transition-all text-slate-600"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                />
-                <div className="absolute inset-y-0 right-6 flex items-center">
-                  <button className="p-2 bg-slate-50 rounded-xl text-slate-400 hover:text-slate-600 transition-colors">
-                    <SlidersHorizontal size={20} />
-                  </button>
-                </div>
+        <main className="flex-1 overflow-auto p-4 md:p-8">
+          <div className="max-w-[1400px] mx-auto space-y-5">
+
+            {/* Search */}
+            <div className="relative">
+              <div className="absolute inset-y-0 left-5 flex items-center pointer-events-none">
+                <Search className="text-slate-400" size={20} />
+              </div>
+              <input
+                type="text"
+                placeholder="Search by name, email or group..."
+                className="w-full h-13 pl-14 pr-14 py-3.5 bg-white border border-slate-200 rounded-2xl shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-400/20 text-slate-600"
+                value={searchQuery}
+                onChange={e => setSearchQuery(e.target.value)}
+              />
+            </div>
+
+            {/* Filters */}
+            <div className="flex flex-wrap items-center gap-3">
+              {/* Year toggles */}
+              {YEARS.map(year => (
+                <button
+                  key={year}
+                  onClick={() => toggleYear(year)}
+                  className={`px-4 py-1.5 rounded-xl text-sm font-semibold border transition-all ${
+                    yearFilters.includes(year)
+                      ? 'bg-indigo-600 text-white border-indigo-600'
+                      : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50'
+                  }`}
+                >
+                  {year}
+                </button>
+              ))}
+
+              <div className="h-5 w-px bg-slate-200" />
+
+              {/* Status toggles */}
+              {[
+                { val: 'all', label: 'All' },
+                { val: 'assigned', label: 'Assigned' },
+                { val: 'unassigned', label: 'Unassigned' },
+              ].map(opt => (
+                <button
+                  key={opt.val}
+                  onClick={() => setStatusFilter(opt.val)}
+                  className={`px-4 py-1.5 rounded-xl text-sm font-semibold border transition-all ${
+                    statusFilter === opt.val
+                      ? 'bg-slate-800 text-white border-slate-800'
+                      : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50'
+                  }`}
+                >
+                  {opt.label}
+                </button>
+              ))}
+            </div>
+
+            {/* Table */}
+            <div className="bg-white rounded-[2rem] shadow-sm border border-slate-100 overflow-hidden">
+              <div className="px-8 py-5 flex items-center gap-4 border-b border-slate-50">
+                <h2 className="text-xl font-bold text-slate-800">Students</h2>
+                <span className="px-3 py-1 bg-indigo-50 text-indigo-600 text-[11px] font-bold rounded-full">
+                  {filtered.length} students
+                </span>
               </div>
 
-              {/* Filter Chips Section */}
-              <div className="flex flex-wrap gap-3">
-                {filters.map((filter) => (
-                  <div 
-                    key={filter} 
-                    className="flex items-center gap-2 px-4 py-2 bg-[#E9EDF1] text-slate-700 rounded-xl text-sm font-semibold transition-colors"
-                  >
-                    {filter}
-                    <button 
-                      onClick={() => removeFilter(filter)}
-                      className="text-red-400 hover:text-red-600 transition-colors"
-                    >
-                      <X size={14} strokeWidth={3} />
-                    </button>
-                  </div>
-                ))}
-              </div>
-
-              {/* Department Table Container */}
-              <div className="bg-white rounded-[2rem] shadow-sm border border-slate-100 overflow-hidden">
-                {/* Table Header Area */}
-                <div className="px-10 py-6 flex items-center gap-4 border-b border-slate-50">
-                  <h2 className="text-xl font-bold text-slate-800">Computer Department</h2>
-                  <span className="px-3 py-1 bg-[#E8F0FE] text-[#4285F4] text-[10px] font-bold rounded-full">
-                    272 Students
-                  </span>
-                </div>
-
-                {/* Data Table */}
-                <div className="overflow-x-auto">
-                  <table className="w-full text-left">
-                    <thead>
-                      <tr className="bg-slate-50/30">
-                        <th className="px-10 py-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider">Sr.No</th>
-                        <th className="px-6 py-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider">Name</th>
-                        <th className="px-6 py-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider">Year</th>
-                        <th className="px-6 py-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider">Group</th>
-                        <th className="px-6 py-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider">Mentor</th>
-                        <th className="px-6 py-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider text-center">Status</th>
-                        <th className="px-10 py-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider text-right">Action</th>
+              <div className="overflow-x-auto">
+                <table className="w-full text-left">
+                  <thead>
+                    <tr className="bg-slate-50/40">
+                      <th className="px-8 py-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider">#</th>
+                      <th className="px-6 py-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider">Name</th>
+                      <th className="px-6 py-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider">Email</th>
+                      <th className="px-6 py-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider">Year</th>
+                      <th className="px-6 py-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider">Group</th>
+                      <th className="px-6 py-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider">Mentor</th>
+                      <th className="px-6 py-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider text-center">Status</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-50">
+                    {isLoading ? (
+                      <tr>
+                        <td colSpan={7} className="px-8 py-16 text-center">
+                          <div className="flex justify-center">
+                            <div className="w-7 h-7 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin" />
+                          </div>
+                        </td>
                       </tr>
-                    </thead>
-                    <tbody className="divide-y divide-slate-50">
-                      {students.map((student, idx) => (
-                        <tr key={idx} className="hover:bg-slate-50/50 transition-colors">
-                          <td className="px-10 py-5 text-sm text-slate-500">{student.srNo}.</td>
-                          <td className="px-6 py-5 text-sm text-slate-700 font-medium">{student.name}</td>
-                          <td className="px-6 py-5 text-sm text-slate-500">{student.year}</td>
-                          <td className="px-6 py-5 text-sm text-slate-500">{student.group}</td>
-                          <td className="px-6 py-5">
+                    ) : filtered.length === 0 ? (
+                      <tr>
+                        <td colSpan={7} className="px-8 py-16 text-center text-slate-400 text-sm">
+                          No students found.
+                        </td>
+                      </tr>
+                    ) : (
+                      filtered.map((student, idx) => (
+                        <tr key={student._id} className="hover:bg-slate-50/50 transition-colors">
+                          <td className="px-8 py-4 text-sm text-slate-400">{idx + 1}.</td>
+                          <td className="px-6 py-4 text-sm text-slate-800 font-semibold">
+                            {student.name || <span className="text-slate-400 italic">No name</span>}
+                          </td>
+                          <td className="px-6 py-4 text-sm text-slate-500">{student.email}</td>
+                          <td className="px-6 py-4 text-sm text-slate-500">
+                            {student.groupYear ? (
+                              <span className="px-2.5 py-1 bg-slate-100 text-slate-600 text-[11px] font-bold rounded-lg">
+                                {student.groupYear}
+                              </span>
+                            ) : '—'}
+                          </td>
+                          <td className="px-6 py-4 text-sm text-slate-500">
+                            {student.groupName || <span className="text-slate-300">N/A</span>}
+                          </td>
+                          <td className="px-6 py-4">
                             {student.mentor ? (
                               <div className="flex items-center gap-2">
-                                <img src={student.mentor.image} className="w-6 h-6 rounded-full border border-slate-100 shadow-sm" alt="" />
-                                <span className="text-sm text-slate-600">{student.mentor.name}</span>
+                                <div className="w-6 h-6 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center text-[10px] font-bold shrink-0">
+                                  {(student.mentor.name || student.mentor.email || '?')[0].toUpperCase()}
+                                </div>
+                                <span className="text-sm text-slate-600">{student.mentor.name || student.mentor.email}</span>
                               </div>
                             ) : (
-                              <span className="px-3 py-1 bg-red-50 text-red-400 text-[10px] font-bold rounded-full">
-                                Needs Mentor
+                              <span className="px-2.5 py-1 bg-red-50 text-red-400 text-[10px] font-bold rounded-full">
+                                No Mentor
                               </span>
                             )}
                           </td>
-                          <td className="px-6 py-5">
-                            <div className="flex justify-center">
-                              <span className={`
-                                px-4 py-1.5 rounded-full text-[11px] font-bold tracking-tight
-                                ${student.status === 'Assigned' 
-                                  ? 'bg-emerald-50 text-emerald-500' 
-                                  : 'bg-orange-50 text-[#F4B400]'}
-                              `}>
-                                {student.status}
-                              </span>
-                            </div>
-                          </td>
-                          <td className="px-10 py-5 text-right">
-                            <button className="p-2 text-slate-300 hover:text-indigo-600 hover:bg-indigo-50 rounded-xl transition-all">
-                              <Edit3 size={18} />
-                            </button>
+                          <td className="px-6 py-4 text-center">
+                            <span className={`px-3 py-1.5 rounded-full text-[11px] font-bold ${
+                              student.isAssigned
+                                ? 'bg-emerald-50 text-emerald-600'
+                                : 'bg-orange-50 text-orange-500'
+                            }`}>
+                              {student.isAssigned ? 'Assigned' : 'Unassigned'}
+                            </span>
                           </td>
                         </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
+                      ))
+                    )}
+                  </tbody>
+                </table>
               </div>
             </div>
+
           </div>
         </main>
       </div>

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Sidebar from "../components/Sidebar";
 import Topbar from "../components/Topbar";
 import GroupOverview from "../components/Dashboard/GroupOverview";
@@ -8,9 +8,36 @@ import ReportSummary from "../components/Dashboard/ReportSummary";
 import UpcomingDeadlines from "../components/Dashboard/UpcomingDeadlines";
 import RecentActivities from "../components/Dashboard/RecentActivities";
 import CalendarWidget from "../components/Dashboard/CalendarWidget";
+import useGroupStore from "../store/groupStore";
+import useTaskStore from "../store/taskStore";
+import useReportStore from "../store/reportStore";
+import useDiaryStore from "../store/diaryStore";
+import useUserStore from "../store/userStore";
 
 export default function StudentDashboard() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const { fetchGroups, groups } = useGroupStore();
+  const { getGroupTasks } = useTaskStore();
+  const { fetchReports } = useReportStore();
+  const { fetchDiaries } = useDiaryStore();
+  const { user } = useUserStore();
+
+  useEffect(() => {
+    const refreshData = async () => {
+      await fetchGroups();
+      const userGroup = groups.find(g => 
+        g.admin?._id === user?.id || 
+        g.members?.some(m => m.userId?._id === user?.id && m.status === 'accepted')
+      );
+      if (userGroup) {
+        await getGroupTasks(userGroup._id).catch(() => {});
+        await fetchReports(userGroup._id).catch(() => {});
+        await fetchDiaries(userGroup._id).catch(() => {});
+      }
+    };
+
+    refreshData();
+  }, [fetchGroups, groups, user, getGroupTasks, fetchReports, fetchDiaries]);
 
   return (
     <div className="min-h-screen flex bg-gray-50">

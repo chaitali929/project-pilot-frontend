@@ -73,6 +73,8 @@ export const coordinatorAPI = {
   getMentors: () => api.get('/api/coordinator/mentors'),
   assignMentors:(groupId,mentorId)=>api.post('/api/coordinator/assign-mentor',{groupId,mentorId}),
   removeGroup:(groupId)=>api.post(`/api/coordinator/remove-group/${groupId}`),
+  getStats: () => api.get('/api/coordinator/stats'),
+  getStudents: () => api.get('/api/coordinator/students'),
   postTopic: (topicData) => api.post('/api/topics/post-topic', topicData, {
     headers: { 'Content-Type': 'multipart/form-data' }
   }),
@@ -83,10 +85,22 @@ export const coordinatorAPI = {
   }),
   getReports: (groupId) => api.get(`/api/reports/${groupId}`),
   respondToReport: (reportId, status, mentorFeedback) => api.post(`/api/reports/respond/${reportId}`, {status, mentorFeedback}),
+  // Admin routes
+  adminGetUsers: () => api.get('/api/coordinator/admin/users'),
+  adminChangeRole: (userId, role) => api.patch(`/api/coordinator/admin/users/${userId}/role`, { role }),
+  adminDeleteUser: (userId) => api.delete(`/api/coordinator/admin/users/${userId}`),
+  adminGetGroups: () => api.get('/api/coordinator/admin/groups'),
+  adminChangeMentor: (groupId, mentorId) => api.patch(`/api/coordinator/admin/groups/${groupId}/mentor`, { mentorId }),
+  adminDeleteGroup: (groupId) => api.delete(`/api/coordinator/admin/groups/${groupId}`),
+  adminRemoveMember: (groupId, userId) => api.delete(`/api/coordinator/admin/groups/${groupId}/members/${userId}`),
+  adminGetTopics: () => api.get('/api/coordinator/admin/topics'),
+  adminUpdateTopicStatus: (topicId, status) => api.patch(`/api/coordinator/admin/topics/${topicId}/status`, { status }),
+  adminGetReports: () => api.get('/api/coordinator/admin/reports'),
 };
 
 
 export const mentorAPI = {
+  getStats: () => api.get('/api/mentor/stats'),
   getGroups: () => api.get('/api/mentor/groups'),
   getTopics: () => api.get('/api/mentor/topics'),
   getTopicsByGroup: (groupId) => api.get(`/api/mentor/topics/group/${groupId}`),
@@ -103,6 +117,10 @@ export const mentorAPI = {
 export const TopicAPI = {
   postTopic:(topicData)=>api.post('/api/topics/post-topic',topicData),
   getTopics:(mentorId)=>api.get(`/api/mentor/topics/${mentorId}`),
+};
+
+export const chatAPI = {
+  sendMessage: (message, history) => api.post('/api/chat/chat', { message, history }),
 };
 
 export default api;

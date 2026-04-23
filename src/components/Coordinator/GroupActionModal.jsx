@@ -8,10 +8,8 @@ const GroupActionModal = ({ isOpen, onClose, group }) => {
   const { assignMentor, removeGroup, mentors, fetchMentors, isLoading } = useCoordinatorStore();
 
   useEffect(() => {
-    if (isOpen && showMentorList && mentors.length === 0) {
-      fetchMentors();
-    }
-  }, [isOpen, showMentorList, mentors.length, fetchMentors]);
+    if (isOpen) fetchMentors();
+  }, [isOpen]);
 
   const handleAssignMentor = async () => {
     if (selectedMentor && group) {
@@ -93,16 +91,17 @@ const GroupActionModal = ({ isOpen, onClose, group }) => {
                       : 'bg-slate-50 hover:bg-slate-100 border-2 border-transparent'
                   }`}
                 >
-                  <div className="flex items-center gap-3">
-                    <img
-                      src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${mentor.name}`}
-                      alt={mentor.name}
-                      className="w-10 h-10 rounded-full"
-                    />
-                    <div>
-                      <p className="font-medium text-slate-800">{mentor.name}</p>
-                      <p className="text-sm text-slate-500">{mentor.email}</p>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="w-9 h-9 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600 font-bold text-sm">
+                        {(mentor.name || mentor.email || '?')[0].toUpperCase()}
+                      </div>
+                      <div>
+                        <p className="font-medium text-slate-800 text-sm">{mentor.name || '—'}</p>
+                        <p className="text-xs text-slate-500">{mentor.email}</p>
+                      </div>
                     </div>
+                    <span className="text-xs font-semibold text-slate-400">{mentor.groupCount ?? 0} groups</span>
                   </div>
                 </div>
               ))}

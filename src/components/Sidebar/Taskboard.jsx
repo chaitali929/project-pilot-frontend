@@ -79,7 +79,8 @@ export default function Taskboard() {
           description: taskDescription,
           type: taskType,
           difficulty: taskDifficulty,
-          assignes: assignees
+          assignes: assignees,
+          groupId: groups[0]._id
         });
         setShowModal(false);
         setTaskHeading("");

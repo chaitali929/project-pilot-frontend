@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   LayoutDashboard, CheckSquare, Users, BookOpen, 
   FileText, Briefcase, Book, Bell, User, Settings, 
@@ -7,9 +7,17 @@ import {
 import Topbar from '../components/Topbar';
 import Sidebar from '../components/Sidebar';
 import MentorSidebar from '../components/MentorSideBar';
+import useMentorStore from '../store/mentorStore';
 
 const MentorDashboard = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const { groups, topics, reports, diaries, fetchGroups, fetchReports, fetchDiaries } = useMentorStore();
+
+  useEffect(() => {
+    fetchGroups();
+    fetchReports();
+    fetchDiaries();
+  }, [fetchGroups, fetchReports, fetchDiaries]);
 
   return (
     <div className="min-h-screen flex bg-gray-50">
@@ -47,42 +55,47 @@ const MentorDashboard = () => {
           {/* Group Overview */}
           <div className="col-span-4 bg-white p-6 rounded-3xl border border-gray-100 shadow-sm">
             <div className="flex justify-between items-start mb-4">
-              <h3 className="text-lg font-bold">Group Overview</h3>
-              <span className="bg-blue-50 text-blue-500 text-xs px-3 py-1 rounded-full font-semibold">Active</span>
+              <h3 className="text-lg font-bold">Groups Overview</h3>
+              <span className="bg-blue-50 text-blue-500 text-xs px-3 py-1 rounded-full font-semibold">{groups.length} Groups</span>
             </div>
-            <div className="flex items-center gap-2 mb-6">
-              <span className="text-gray-600 font-medium">Project Team 1</span>
-              <span className="bg-blue-600 text-white text-[10px] px-2 py-0.5 rounded">Leader</span>
-            </div>
-            <div className="flex -space-x-3">
-              {[1, 2, 3, 4].map((i) => (
-                <img key={i} src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${i+10}`} className="w-12 h-12 rounded-full border-4 border-white bg-slate-100" alt="team" />
-              ))}
-            </div>
+            {groups.length > 0 ? (
+              <div className="space-y-3">
+                {groups.slice(0, 3).map((group, idx) => (
+                  <div key={idx} className="flex items-center gap-2">
+                    <span className="text-gray-600 font-medium text-sm">{group.groupName}</span>
+                    <span className="bg-blue-600 text-white text-[10px] px-2 py-0.5 rounded">{group.members?.length || 0} members</span>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="text-gray-400 text-sm">No groups assigned</p>
+            )}
           </div>
 
           {/* Tasks Overview */}
           <div className="col-span-8 bg-white p-6 rounded-3xl border border-gray-100 shadow-sm">
-            <h3 className="text-lg font-bold mb-4">Tasks Overview</h3>
+            <h3 className="text-lg font-bold mb-4">Reports Overview</h3>
             <div className="grid grid-cols-2 gap-4 border-t border-gray-50 pt-4">
               <div>
-                <p className="text-sm font-semibold mb-3">Done</p>
+                <p className="text-sm font-semibold mb-3">Reviewed ({reports.filter(r => r.status === 'accepted' || r.status === 'rejected').length})</p>
                 <ul className="space-y-2">
-                  {['Research', 'Analysis', 'Design'].map(item => (
-                    <li key={item} className="flex items-center gap-2 text-sm text-gray-600">
-                      <div className="w-2 h-2 rounded-full bg-green-500" /> {item}
+                  {reports.filter(r => r.status === 'accepted' || r.status === 'rejected').slice(0, 3).map((report, idx) => (
+                    <li key={idx} className="flex items-center gap-2 text-sm text-gray-600">
+                      <div className={`w-2 h-2 rounded-full ${report.status === 'accepted' ? 'bg-green-500' : 'bg-red-500'}`} /> {report.title || 'Report'}
                     </li>
                   ))}
+                  {reports.filter(r => r.status === 'accepted' || r.status === 'rejected').length === 0 && <li className="text-gray-400 text-xs">No reviewed reports</li>}
                 </ul>
               </div>
               <div className="border-l border-gray-100 pl-4">
-                <p className="text-sm font-semibold mb-3 text-gray-400">Pending</p>
+                <p className="text-sm font-semibold mb-3 text-gray-400">Pending ({reports.filter(r => r.status === 'pending').length})</p>
                 <ul className="space-y-2">
-                  {['Research', 'Analysis', 'Design'].map(item => (
-                    <li key={item} className="flex items-center gap-2 text-sm text-gray-600">
-                      <div className="w-2 h-2 rounded-full bg-orange-400" /> {item}
+                  {reports.filter(r => r.status === 'pending').slice(0, 3).map((report, idx) => (
+                    <li key={idx} className="flex items-center gap-2 text-sm text-gray-600">
+                      <div className="w-2 h-2 rounded-full bg-orange-400" /> {report.title || 'Report'}
                     </li>
                   ))}
+                  {reports.filter(r => r.status === 'pending').length === 0 && <li className="text-gray-400 text-xs">No pending reports</li>}
                 </ul>
               </div>
             </div>
@@ -90,14 +103,20 @@ const MentorDashboard = () => {
 
           {/* Project Progress */}
           <div className="col-span-7 bg-white p-6 rounded-3xl border border-gray-100 shadow-sm">
-            <h3 className="text-lg font-bold mb-8">Project Progress</h3>
-            <div className="relative flex justify-between items-center px-4">
-              <div className="absolute top-1/2 left-0 w-full h-0.5 bg-gray-100 -translate-y-1/2 z-0" />
-              <div className="absolute top-1/2 left-0 w-3/4 h-0.5 bg-blue-500 -translate-y-1/2 z-0" />
-              <ProgressStep label="Topic Submitted" completed />
-              <ProgressStep label="Guide Approved" completed />
-              <ProgressStep label="Reports Submitted" completed />
-              <ProgressStep label="Topic selected" />
+            <h3 className="text-lg font-bold mb-8">Diaries Overview</h3>
+            <div className="space-y-3">
+              <div className="flex justify-between items-center">
+                <span className="text-sm font-medium">Total Diaries</span>
+                <span className="text-2xl font-bold">{diaries.length}</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-sm font-medium">Reviewed</span>
+                <span className="text-lg font-semibold text-green-600">{diaries.filter(d => d.status === 'reviewed').length}</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-sm font-medium">Pending Review</span>
+                <span className="text-lg font-semibold text-orange-600">{diaries.filter(d => d.status === 'pending').length}</span>
+              </div>
             </div>
           </div>
 
@@ -106,38 +125,41 @@ const MentorDashboard = () => {
             <div>
               <h3 className="text-lg font-bold">Report Summary</h3>
               <div className="mt-4">
-                <p className="text-3xl font-bold">5 Reports</p>
-                <p className="text-xs text-gray-400">Submitted this semester</p>
+                <p className="text-3xl font-bold">{reports.length} Reports</p>
+                <p className="text-xs text-gray-400">Total submissions</p>
               </div>
               <div className="mt-6 flex items-center gap-2 text-xs text-gray-400">
-                <Clock size={14} /> Last Submission: 2 days ago
+                <Clock size={14} /> {reports.length > 0 ? `Last: ${new Date(reports[reports.length - 1]?.createdAt).toLocaleDateString()}` : 'No submissions'}
               </div>
             </div>
             <div className="space-y-3">
-              {['ProjectPilot', 'PrePlacement-Hub', 'Quick-legal bot', 'Banking & Management'].map((name, i) => (
+              {reports.slice(0, 4).map((report, i) => (
                 <div key={i} className="flex items-center gap-2 text-xs font-medium">
-                  <div className="w-4 h-1 rounded-full bg-blue-500" /> {name}
+                  <div className={`w-4 h-1 rounded-full ${report.status === 'accepted' ? 'bg-green-500' : report.status === 'rejected' ? 'bg-red-500' : 'bg-blue-500'}`} /> {report.title || `Report ${i + 1}`}
                 </div>
               ))}
+              {reports.length === 0 && <p className="text-gray-400 text-xs">No reports yet</p>}
             </div>
           </div>
 
           {/* Bottom Row */}
           <div className="col-span-3 bg-white p-6 rounded-3xl border border-gray-100 shadow-sm">
-            <h3 className="text-lg font-bold mb-4">Upcoming deadlines</h3>
+            <h3 className="text-lg font-bold mb-4">Pending Reviews</h3>
             <div className="space-y-4">
-              <DeadlineItem title="Project Milestone 2" date="September 15, 2024" />
-              <DeadlineItem title="Group Presentation" date="September 20, 2024" />
-              <DeadlineItem title="Final Report Submission" date="September 30, 2024" />
+              {reports.filter(r => r.status === 'pending').slice(0, 3).map((report, idx) => (
+                <DeadlineItem key={idx} title={report.title || 'Report'} date={new Date(report.createdAt).toLocaleDateString()} />
+              ))}
+              {reports.filter(r => r.status === 'pending').length === 0 && <p className="text-gray-400 text-sm">No pending reviews</p>}
             </div>
           </div>
 
           <div className="col-span-4 bg-white p-6 rounded-3xl border border-gray-100 shadow-sm">
             <h3 className="text-lg font-bold mb-4">Recent Activities</h3>
             <div className="space-y-6">
-              <ActivityItem title="Completed Design Wireframes" time="2 hrs ago" color="bg-green-500" />
-              <ActivityItem title="Submitted Report" time="Yesterday" color="bg-blue-500" />
-              <ActivityItem title="Group uploaded revised synopsis" time="4 days ago" color="bg-blue-500" />
+              {reports.slice(-3).reverse().map((report, idx) => (
+                <ActivityItem key={idx} title={`${report.status === 'pending' ? 'New' : 'Reviewed'} Report: ${report.title || 'Untitled'}`} time={new Date(report.createdAt).toLocaleDateString()} color={report.status === 'accepted' ? 'bg-green-500' : report.status === 'rejected' ? 'bg-red-500' : 'bg-blue-500'} />
+              ))}
+              {reports.length === 0 && <p className="text-gray-400 text-sm">No recent activities</p>}
             </div>
           </div>
 

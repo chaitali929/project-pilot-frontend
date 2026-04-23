@@ -8,6 +8,7 @@ const Signup = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [formData, setFormData] = useState({
+    name: '',
     email: '',
     password: '',
     confirmPassword: '',
@@ -91,6 +92,18 @@ const Signup = () => {
 
         {/* Form */}
         <form onSubmit={handleSignup} className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700">Full Name</label>
+            <input
+              type="text"
+              placeholder="Enter your full name"
+              value={formData.name}
+              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+              className="mt-1 w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring focus:ring-blue-300"
+              required
+            />
+          </div>
+
           <div>
             <label className="block text-sm font-medium text-gray-700">Role</label>
             <select

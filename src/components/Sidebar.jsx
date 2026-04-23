@@ -1,10 +1,9 @@
 import React from "react";
 import { NavLink } from "react-router-dom";
-import { MdDashboard, MdTopic, MdNotifications, MdGroup, } from "react-icons/md";
+import { MdDashboard, MdTopic, MdNotifications, MdGroup } from "react-icons/md";
 import { FaTasks } from "react-icons/fa";
 import { HiOutlineDocumentReport } from "react-icons/hi";
-
-import { FiPackage, FiUser, FiSliders, FiHelpCircle } from "react-icons/fi";
+import { FiPackage, FiUser, FiHelpCircle, FiMessageCircle } from "react-icons/fi";
 
 export default function Sidebar({ isMobile = false, onClose }) {
   const linkClasses = ({ isActive }) =>
@@ -102,22 +101,22 @@ export default function Sidebar({ isMobile = false, onClose }) {
   </p>
   <ul className="space-y-1">
     <li>
-      <button className="w-full flex items-center gap-3 text-left px-4 py-2 rounded-lg hover:bg-gray-100">
+      <NavLink to="/StudentDashboard/Profile" className={linkClasses}>
         <FiUser className="w-5 h-5 text-gray-600" />
         <span className="text-gray-700">Profile</span>
-      </button>
+      </NavLink>
     </li>
     <li>
-      <button className="w-full flex items-center gap-3 text-left px-4 py-2 rounded-lg hover:bg-gray-100">
-        <FiSliders className="w-5 h-5 text-gray-600" />
-        <span className="text-gray-700">Preference</span>
-      </button>
-    </li>
-    <li>
-      <button className="w-full flex items-center gap-3 text-left px-4 py-2 rounded-lg hover:bg-gray-100">
+      <NavLink to="/StudentDashboard/Help" className={linkClasses}>
         <FiHelpCircle className="w-5 h-5 text-gray-600" />
         <span className="text-gray-700">Help</span>
-      </button>
+      </NavLink>
+    </li>
+    <li>
+      <NavLink to="/StudentDashboard/Chat" className={linkClasses}>
+        <FiMessageCircle className="w-5 h-5 text-gray-600" />
+        <span className="text-gray-700">Live Chat</span>
+      </NavLink>
     </li>
   </ul>
 </div>

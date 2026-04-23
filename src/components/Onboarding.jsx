@@ -1,16 +1,21 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import useUserStore from '../store/userStore';
 import colleges from '../data/colleges';
 
 const Onboarding = () => {
   const [formData, setFormData] = useState({
+    name: '',
     collegeName: '',
     department: ''
   });
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
   const { updateProfile, user } = useUserStore();
+
+  useEffect(() => {
+    if (user?.name) setFormData(prev => ({ ...prev, name: user.name }));
+  }, [user]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -43,6 +48,20 @@ const Onboarding = () => {
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-6">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Full Name *
+            </label>
+            <input
+              type="text"
+              placeholder="Enter your full name"
+              value={formData.name}
+              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              required
+            />
+          </div>
+
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
               College Name *

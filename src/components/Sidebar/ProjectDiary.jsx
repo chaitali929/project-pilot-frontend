@@ -5,6 +5,8 @@ import {
 } from 'lucide-react';
 import useDiaryStore from '../../store/diaryStore';
 import useGroupStore from '../../store/GroupStore';
+import Sidebar from '../Sidebar';
+import Topbar from '../Topbar';
 
 const ProjectDiary = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -38,8 +40,13 @@ const ProjectDiary = () => {
   const totalWeeks = 12;
 
   return (
-    <div className="max-w-6xl mx-auto w-full">
-      <h2 className="text-3xl font-extrabold text-center text-slate-800 mb-10">Project Dairy</h2>
+    <div className="min-h-screen flex bg-gray-50">
+      <Sidebar />
+      <div className="flex-1 flex flex-col overflow-hidden">
+        <Topbar />
+        <main className="p-6 overflow-auto">
+          <div className="max-w-6xl mx-auto w-full">
+            <h2 className="text-3xl font-extrabold text-center text-slate-800 mb-10">Project Dairy</h2>
 
       {/* Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
@@ -89,16 +96,19 @@ const ProjectDiary = () => {
         <span className="font-bold">New Entry</span>
       </button>
 
-      {isModalOpen && (
-        <NewEntryModal 
-          onClose={() => setIsModalOpen(false)} 
-          currentGroupId={currentGroupId}
-          onSuccess={() => {
-            setIsModalOpen(false);
-            if (currentGroupId) fetchDiaries(currentGroupId);
-          }}
-        />
-      )}
+            {isModalOpen && (
+              <NewEntryModal 
+                onClose={() => setIsModalOpen(false)} 
+                currentGroupId={currentGroupId}
+                onSuccess={() => {
+                  setIsModalOpen(false);
+                  if (currentGroupId) fetchDiaries(currentGroupId);
+                }}
+              />
+            )}
+          </div>
+        </main>
+      </div>
     </div>
   );
 };
